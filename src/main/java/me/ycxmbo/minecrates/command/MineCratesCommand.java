@@ -3,6 +3,7 @@ package me.ycxmbo.minecrates.command;
 import me.ycxmbo.minecrates.MineCrates;
 import me.ycxmbo.minecrates.crate.Crate;
 import me.ycxmbo.minecrates.crate.Reward;
+import me.ycxmbo.minecrates.gui.CrateListGUI;
 import me.ycxmbo.minecrates.service.CrateService;
 import me.ycxmbo.minecrates.util.Messages;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -38,6 +39,10 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
         }
 
         switch (args[0].toLowerCase(Locale.ROOT)) {
+            case "editor" -> {
+                if (!(sender instanceof Player p)) { Messages.msg(sender, "<red>Players only.</red>"); return true; }
+                new CrateListGUI(plugin, service).open(p);
+            }
             case "list" -> {
                 Collection<Crate> crates = service.crates();
                 if (crates.isEmpty()) {
@@ -166,7 +171,8 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
                 <white>/%s set <crate></white> <gray>— bind to targeted block</gray>
                 <white>/%s testroll <crate> <n></white>
                 <white>/%s reload</white>
-                """.formatted(label, label, label, label, label, label, label));
+                <white>/%s editor</white> <gray>— edit crates</gray>
+                """.formatted(label, label, label, label, label, label, label, label));
     }
 
     // ───────── Tab Complete ─────────
@@ -175,7 +181,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> out = new ArrayList<>();
         if (args.length == 1) {
-            out.addAll(List.of("help","list","preview","open","givekey","giveall","set","reload","testroll"));
+            out.addAll(List.of("help","list","preview","open","givekey","giveall","set","reload","testroll","editor"));
         } else {
             switch (args[0].toLowerCase(Locale.ROOT)) {
                 case "preview","open","set","testroll" -> {
