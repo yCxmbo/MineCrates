@@ -1,0 +1,15 @@
+prefix: "<gray>[<green>MineCrates</green>]</gray> "
+
+errors:
+  player-only: "<red>Players only.</red>"
+  unknown-crate: "<red>Unknown crate.</red>"
+  need-key: "<yellow>You don't have a key for this crate.</yellow>"
+  on-cooldown: "<yellow>You must wait <white>%sec%s</white> to open this again.</yellow>"
+  no-vault: "<red>Economy is required for this crate.</red>"
+  not-enough-money: "<red>You need <white>$%amount%</white> to open this.</red>"
+  not-bound: "<yellow>This block is not bound to a crate.</yellow>"
+
+info:
+  bound: "<green>Bound <white>%crate%</white> to this block.</green>"
+  unbound: "<green>Crate unbound from this block.</green>"
+  reloaded: "<green>Configs reloaded.</green>"

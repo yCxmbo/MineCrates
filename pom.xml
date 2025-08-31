@@ -1,0 +1,170 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+                             http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>me.ycxmbo</groupId>
+    <artifactId>minecrates</artifactId>
+    <version>0.9.0</version>
+    <name>MineCrates</name>
+    <description>Modern crates plugin for Paper 1.20.x–1.21.x</description>
+    <url>https://example.invalid/minecrates</url>
+    <packaging>jar</packaging>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.release>17</maven.compiler.release>
+        <adventure.minimessage.version>4.17.0</adventure.minimessage.version>
+        <vault.version>1.7</vault.version>
+        <papi.version>2.11.6</papi.version>
+        <dh.version>2.9.7</dh.version>
+    </properties>
+
+    <!-- Select ONE: -P v1_20_6  or  -P v1_21 (default none) -->
+    <profiles>
+        <profile>
+            <id>v1_20_6</id>
+            <properties>
+                <paper.api>1.20.6-R0.1-SNAPSHOT</paper.api>
+            </properties>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+        </profile>
+        <profile>
+            <id>v1_21</id>
+            <properties>
+                <paper.api>1.21.1-R0.1-SNAPSHOT</paper.api>
+            </properties>
+        </profile>
+    </profiles>
+
+    <dependencies>
+        <!-- Paper API (compileOnly) -->
+        <dependency>
+            <groupId>io.papermc.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>${paper.api}</version>
+        </dependency>
+
+        <!-- Adventure MiniMessage (shaded & relocated) -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>${adventure.minimessage.version}</version>
+        </dependency>
+
+        <!-- Vault API (soft-depend / compileOnly) -->
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>${vault.version}</version>
+        </dependency>
+
+        <!-- PlaceholderAPI (soft-depend / compileOnly) -->
+        <dependency>
+            <groupId>me.clip</groupId>
+            <artifactId>placeholderapi</artifactId>
+            <version>${papi.version}</version>
+        </dependency>
+
+        <!-- DecentHolograms (soft-depend / compileOnly) -->
+        <dependency>
+            <groupId>com.github.decentsoftware-eu</groupId>
+            <artifactId>decentholograms</artifactId>
+            <version>${dh.version}</version>
+        </dependency>
+
+        <!-- (Optional) JUnit for tests -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>5.10.2</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- Enforce Java 17 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.4.1</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[17,)</version>
+                                </requireJavaVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Compiler (release 17) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${maven.compiler.release}</release>
+                    <compilerArgs>
+                        <arg>-Xlint:deprecation</arg>
+                        <arg>-Xlint:unchecked</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
+
+            <!-- Shade MiniMessage only (relocate) -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.5.3</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>shade</goal></goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>net.kyori.adventure.text.minimessage</pattern>
+                                    <shadedPattern>me.ycxmbo.minecrates.libs.minimessage</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <minimizeJar>true</minimizeJar>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <excludes>
+                                        <!-- never shade Paper/Spigot/Vault/PAPI/DH classes -->
+                                        <exclude>org/bukkit/**</exclude>
+                                        <exclude>net/md_5/**</exclude>
+                                        <exclude>io/papermc/**</exclude>
+                                        <exclude>com/github/MilkBowl/**</exclude>
+                                        <exclude>me/clip/placeholderapi/**</exclude>
+                                        <exclude>eu/decentsoftware/holograms/**</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Surefire for tests -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.2.5</version>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,37 @@
+crates:
+  mystic:
+    display: "<gradient:#8A2BE2:#00FFFF>Mystic Crate</gradient>"
+    type: BLOCK
+    requires-key: true
+    key: mystic_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 1.25
+      lines:
+        - "<gradient:#8A2BE2:#00FFFF><b>Mystic Crate</b></gradient>"
+        - "<gray>Right-click with a key</gray>"
+    rewards:
+      diamond_pack:
+        weight: 35
+        rarity: COMMON
+        announce: false
+        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        items:
+          i1:
+            material: DIAMOND
+            amount: 16
+      legendary_sword:
+        weight: 2
+        rarity: LEGENDARY
+        announce: true
+        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        commands:
+          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
+        items:
+          i1:
+            material: NETHERITE_SWORD

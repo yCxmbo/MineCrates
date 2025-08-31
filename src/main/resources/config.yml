@@ -1,0 +1,12 @@
+config-version: 1
+messages:
+  prefix: "<green><b>Mine</b></green><white><b>Crates</b></white> <gray>»</gray> "
+
+animation:
+  type: ROULETTE     # ROULETTE | REVEAL
+  roulette:
+    speed-ticks: 3
+    cycles: 36
+  reveal:
+    speed-ticks: 6
+    flickers: 16

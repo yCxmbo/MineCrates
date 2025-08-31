@@ -1,0 +1,67 @@
+name: MineCrates
+main: me.ycxmbo.minecrates.MineCrates
+version: 1.0.0
+api-version: '1.20'
+author: ycxmbo
+website: https://example.invalid/minecrates
+softdepend: [Vault, PlaceholderAPI, DecentHolograms]
+
+commands:
+  minecrates:
+    description: Base command for MineCrates
+    usage: "/minecrates help"
+    aliases: [crates, cc]
+    permission: minecrates.use
+
+permissions:
+  minecrates.use:
+    description: Access to /minecrates help and basic info
+    default: true
+
+  minecrates.preview:
+    description: Use /minecrates preview <crate>
+    default: true
+
+  minecrates.open:
+    description: Use /minecrates open <crate> [player]
+    default: op
+
+  minecrates.open.block:
+    description: Open block crates in the world
+    default: true
+
+  minecrates.open.virtual:
+    description: Open virtual crates via command
+    default: op
+
+  minecrates.givekey:
+    description: Give keys to a player
+    default: op
+
+  minecrates.giveall:
+    description: Give keys to all online players
+    default: op
+
+  minecrates.set:
+    description: Bind a crate to the targeted block
+    default: op
+
+  minecrates.reload:
+    description: Reload all configs
+    default: op
+
+  minecrates.testroll:
+    description: Run a test distribution for a crate
+    default: op
+
+  minecrates.bypass.cooldown:
+    description: Bypass crate cooldowns
+    default: op
+
+  minecrates.bypass.cost:
+    description: Bypass cost (Vault/Exp) to open crates
+    default: op
+
+  minecrates.bypass.breakbound:
+    description: Break crate-bound blocks without unbinding first
+    default: op
