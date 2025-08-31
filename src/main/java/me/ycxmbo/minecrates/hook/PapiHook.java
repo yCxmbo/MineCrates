@@ -2,9 +2,11 @@ package me.ycxmbo.minecrates.hook;
 
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.ycxmbo.minecrates.MineCrates;
+import me.ycxmbo.minecrates.crate.Crate;
 import me.ycxmbo.minecrates.service.CrateService;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,6 +50,20 @@ public final class PapiHook {
             if (params.startsWith("cooldown_")) {
                 String crateId = params.substring("cooldown_".length());
                 return String.valueOf(service.cooldownRemaining(p.getUniqueId(), crateId));
+            }
+
+            // %minecrates_crate_name_{id}%
+            if (params.startsWith("crate_name_")) {
+                String crateId = params.substring("crate_name_".length());
+                Crate crate = service.crate(crateId);
+                return crate != null ? crate.displayName() : "";
+            }
+
+            // %minecrates_key_name_{id}%
+            if (params.startsWith("key_name_")) {
+                String keyId = params.substring("key_name_".length());
+                ItemStack item = service.createKeyItem(keyId, 1);
+                return item != null && item.hasItemMeta() ? item.getItemMeta().getDisplayName() : "";
             }
 
             // %minecrates_last_reward%

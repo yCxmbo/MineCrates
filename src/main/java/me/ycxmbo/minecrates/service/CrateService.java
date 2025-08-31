@@ -22,7 +22,15 @@ public interface CrateService {
     Reward pick(Crate crate, Random rng);
     double weightPercent(Crate crate, Reward reward);
 
-    // Open flow
+    /**
+     * Attempts to open the given crate for the player. Implementations
+     * should handle cost, keys and cooldowns before invoking an animation.
+     * The returned future completes once the reward has been granted.
+     *
+     * @param player player opening the crate
+     * @param crate  crate being opened
+     * @return future completed with {@code true} if a reward was granted
+     */
     CompletableFuture<Boolean> open(Player player, Crate crate);
 
     // Keys

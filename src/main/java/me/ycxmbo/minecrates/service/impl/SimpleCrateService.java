@@ -20,9 +20,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 public final class SimpleCrateService implements CrateService {
@@ -32,14 +32,14 @@ public final class SimpleCrateService implements CrateService {
     private final HologramManager holograms;
 
     // Data (memory)
-    private final Map<String, Crate> crates = new LinkedHashMap<>();
-    private final Map<String, Key> keys = new LinkedHashMap<>();
-    private final Map<Location, String> bindings = new HashMap<>();
+    private volatile Map<String, Crate> crates = new ConcurrentHashMap<>();
+    private volatile Map<String, Key> keys = new ConcurrentHashMap<>();
+    private volatile Map<Location, String> bindings = new ConcurrentHashMap<>();
 
-    private final Map<UUID, Map<String, Integer>> virtKeys = new HashMap<>();
-    private final Map<UUID, Map<String, Long>> cooldowns = new HashMap<>();
-    private final Map<UUID, Long> opened = new HashMap<>();
-    private final Map<UUID, String> lastReward = new HashMap<>();
+    private final Map<UUID, Map<String, Integer>> virtKeys = new ConcurrentHashMap<>();
+    private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
+    private final Map<UUID, Long> opened = new ConcurrentHashMap<>();
+    private final Map<UUID, String> lastReward = new ConcurrentHashMap<>();
 
     private final MiniMessage mm = MiniMessage.miniMessage();
 
@@ -52,16 +52,22 @@ public final class SimpleCrateService implements CrateService {
     @Override
     public CompletableFuture<Void> reloadAllAsync() {
         return CompletableFuture.runAsync(() -> {
-            crates.clear();
-            keys.clear();
-            bindings.clear();
+            Map<String, Crate> newCrates = new ConcurrentHashMap<>();
+            Map<String, Key> newKeys = new ConcurrentHashMap<>();
+            Map<Location, String> newBindings = new ConcurrentHashMap<>();
 
             ensureDefaults();
 
-            loadKeys(new File(plugin.getDataFolder(), "keys.yml"));
-            loadCrates(new File(plugin.getDataFolder(), "crates.yml"));
+            loadKeys(new File(plugin.getDataFolder(), "keys.yml"), newKeys);
+            loadCrates(new File(plugin.getDataFolder(), "crates.yml"), newCrates, newKeys);
 
-            loadBindings(new File(plugin.getDataFolder(), "bindings.yml"));
+            loadBindings(new File(plugin.getDataFolder(), "bindings.yml"), newBindings);
+
+            synchronized (this) {
+                crates = newCrates;
+                keys = newKeys;
+                bindings = newBindings;
+            }
 
         }, Executors.newSingleThreadExecutor()).thenRun(() -> {
             // back to main thread: refresh holograms
@@ -76,7 +82,7 @@ public final class SimpleCrateService implements CrateService {
         plugin.saveResource("rewards.yml", false);
     }
 
-    private void loadKeys(File f) {
+    private void loadKeys(File f, Map<String, Key> target) {
         YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
         ConfigurationSection sec = y.getConfigurationSection("keys");
         if (sec == null) return;
@@ -88,11 +94,11 @@ public final class SimpleCrateService implements CrateService {
             ItemStack base = new ItemStack(mat == null ? Material.TRIPWIRE_HOOK : mat);
             ItemUtil.applyName(base, display);
             Key k = new Key(id.toLowerCase(Locale.ROOT), display, base);
-            keys.put(k.id(), k);
+            target.put(k.id(), k);
         }
     }
 
-    private void loadCrates(File f) {
+    private void loadCrates(File f, Map<String, Crate> target, Map<String, Key> keys) {
         YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
         ConfigurationSection sec = y.getConfigurationSection("crates");
         if (sec == null) return;
@@ -100,11 +106,11 @@ public final class SimpleCrateService implements CrateService {
             ConfigurationSection cs = sec.getConfigurationSection(id);
             if (cs == null) continue;
             Crate crate = Crate.fromSection(id, cs, keys);
-            crates.put(crate.id(), crate);
+            target.put(crate.id(), crate);
         }
     }
 
-    private void loadBindings(File f) {
+    private void loadBindings(File f, Map<Location, String> target) {
         if (!f.exists()) return;
         YamlConfiguration y = YamlConfiguration.loadConfiguration(f);
         ConfigurationSection b = y.getConfigurationSection("bindings");
@@ -119,15 +125,16 @@ public final class SimpleCrateService implements CrateService {
                 String id = ws.getString(key);
                 org.bukkit.World w = Bukkit.getWorld(world);
                 if (w != null && id != null) {
-                    bindings.put(new Location(w, x, yv, z), id.toLowerCase(Locale.ROOT));
+                    target.put(new Location(w, x, yv, z), id.toLowerCase(Locale.ROOT));
                 }
             }
         }
     }
 
-    private void saveBindings() {
+    private void saveData() {
         YamlConfiguration y = new YamlConfiguration();
-        for (Map.Entry<Location,String> e : bindings.entrySet()) {
+        Map<Location, String> snapshot = new HashMap<>(bindings);
+        for (Map.Entry<Location, String> e : snapshot.entrySet()) {
             Location l = e.getKey();
             String id = e.getValue();
             String path = "bindings." + l.getWorld().getName() + "." + l.getBlockX() + "," + l.getBlockY() + "," + l.getBlockZ();
@@ -223,7 +230,7 @@ public final class SimpleCrateService implements CrateService {
             // record stats + cooldown
             lastReward.put(player.getUniqueId(), r.id());
             opened.merge(player.getUniqueId(), 1L, Long::sum);
-            cooldowns.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>())
+            cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
                     .put(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
 
             return true;
@@ -246,9 +253,10 @@ public final class SimpleCrateService implements CrateService {
 
     @Override
     public void giveVirtualKeys(UUID playerId, String keyId, int amount) {
-        virtKeys.computeIfAbsent(playerId, u -> new HashMap<>())
-                .merge(keyId.toLowerCase(Locale.ROOT), amount, Integer::sum);
-        if (virtKeys.get(playerId).get(keyId) <= 0) virtKeys.get(playerId).remove(keyId);
+        String id = keyId.toLowerCase(Locale.ROOT);
+        virtKeys.computeIfAbsent(playerId, u -> new ConcurrentHashMap<>())
+                .merge(id, amount, Integer::sum);
+        if (virtKeys.get(playerId).get(id) <= 0) virtKeys.get(playerId).remove(id);
     }
 
     @Override
@@ -259,14 +267,14 @@ public final class SimpleCrateService implements CrateService {
     @Override
     public void bind(Location location, String crateId) {
         bindings.put(location.getBlock().getLocation(), crateId.toLowerCase(Locale.ROOT));
-        saveBindings();
+        saveData();
         holograms.upsert(location, crate(crateId));
     }
 
     @Override
     public void unbind(Location location) {
         bindings.remove(location.getBlock().getLocation());
-        saveBindings();
+        saveData();
         holograms.remove(location);
     }
 
