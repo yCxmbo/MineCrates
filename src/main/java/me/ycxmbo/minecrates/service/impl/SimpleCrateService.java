@@ -6,6 +6,9 @@ import me.ycxmbo.minecrates.crate.Key;
 import me.ycxmbo.minecrates.crate.Reward;
 import me.ycxmbo.minecrates.crate.RewardPicker;
 import me.ycxmbo.minecrates.hook.HologramManager;
+import me.ycxmbo.minecrates.gui.OpenAnimationGUI;
+import me.ycxmbo.minecrates.event.CrateOpenEvent;
+import me.ycxmbo.minecrates.event.CrateRewardGiveEvent;
 import me.ycxmbo.minecrates.hook.VaultHook;
 import me.ycxmbo.minecrates.service.CrateService;
 import me.ycxmbo.minecrates.util.ItemUtil;
@@ -76,10 +79,17 @@ public final class SimpleCrateService implements CrateService {
     }
 
     private void ensureDefaults() {
-        plugin.saveResource("config.yml", false);
-        plugin.saveResource("crates.yml", false);
-        plugin.saveResource("keys.yml", false);
-        plugin.saveResource("rewards.yml", false);
+        ensureDefault("config.yml");
+        ensureDefault("crates.yml");
+        ensureDefault("keys.yml");
+        ensureDefault("rewards.yml");
+    }
+
+    private void ensureDefault(String name) {
+        try {
+            File f = new File(plugin.getDataFolder(), name);
+            if (!f.exists()) plugin.saveResource(name, false);
+        } catch (Exception ignored) {}
     }
 
     private void loadKeys(File f, Map<String, Key> target) {
@@ -89,7 +99,7 @@ public final class SimpleCrateService implements CrateService {
         for (String id : sec.getKeys(false)) {
             ConfigurationSection ks = sec.getConfigurationSection(id);
             if (ks == null) continue;
-            String display = ks.getString("display", id);
+            String display = ks.getString("display", ks.getString("key-display", id));
             Material mat = Material.matchMaterial(ks.getString("material","TRIPWIRE_HOOK"));
             ItemStack base = new ItemStack(mat == null ? Material.TRIPWIRE_HOOK : mat);
             ItemUtil.applyName(base, display);
@@ -161,51 +171,44 @@ public final class SimpleCrateService implements CrateService {
 
     @Override
     public CompletableFuture<Boolean> open(Player player, Crate crate) {
-        return CompletableFuture.supplyAsync(() -> {
-            // Cooldown
-// inside open(Player, Crate) BEFORE picking the reward:
+        CompletableFuture<Boolean> future = new CompletableFuture<>();
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            long now = System.currentTimeMillis();
+            long until = cooldowns.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(crate.id(), 0L);
+            if (until > now) {
+                long remain = (until - now) / 1000L;
+                Messages.msg(player, "<red>Please wait <white>" + remain + "s</white> before opening again.</red>");
+                try {
+                    player.sendActionBar(MiniMessage.miniMessage().deserialize(MineCrates.get().configManager().msg("cooldown.actionbar").replace("<seconds>", String.valueOf(remain))));
+                } catch (Throwable ignored) {}
+                future.complete(false);
+                return;
+            }
+
             if (crate.costEnabled() && !player.hasPermission("minecrates.bypass.cost")) {
                 switch (crate.costCurrency()) {
                     case VAULT -> {
-                        if (!vault.present()) {
-                            me.ycxmbo.minecrates.util.Messages.msg(player, "<red>Economy unavailable.</red>");
-                            return false;
-                        }
-                        if (!vault.withdraw(player, crate.costAmount())) {
-                            me.ycxmbo.minecrates.util.Messages.msg(player, "<red>Need:</red> <white>" + vault.format(crate.costAmount()) + "</white>");
-                            return false;
-                        }
+                        if (!vault.present()) { Messages.msg(player, "<red>Economy unavailable.</red>"); future.complete(false); return; }
+                        if (!vault.withdraw(player, crate.costAmount())) { Messages.msg(player, "<red>Need:</red> <white>" + vault.format(crate.costAmount()) + "</white>"); future.complete(false); return; }
                     }
                     case EXP -> {
-                        int totalExp = player.getTotalExperience();
                         int need = (int)Math.ceil(crate.costAmount());
-                        if (totalExp < need) {
-                            me.ycxmbo.minecrates.util.Messages.msg(player, "<red>Need</red> <white>"+need+" exp</white>.");
-                            return false;
-                        }
+                        if (player.getTotalExperience() < need) { Messages.msg(player, "<red>Need</red> <white>"+need+" exp</white>."); future.complete(false); return; }
                         player.giveExp(-need);
                     }
                     case EXP_LEVELS -> {
-                        int needLv = (int)Math.ceil(crate.costAmount());
-                        if (player.getLevel() < needLv) {
-                            me.ycxmbo.minecrates.util.Messages.msg(player, "<red>Need</red> <white>"+needLv+" levels</white>.");
-                            return false;
-                        }
-                        player.setLevel(player.getLevel() - needLv);
+                        int lv = (int)Math.ceil(crate.costAmount());
+                        if (player.getLevel() < lv) { Messages.msg(player, "<red>Need</red> <white>"+lv+" levels</white>."); future.complete(false); return; }
+                        player.setLevel(player.getLevel() - lv);
                     }
                 }
             }
 
-
-            // Key check (virtual first, then item-inventory by tag)
+            // Key checks
             if (crate.requiresKey()) {
                 boolean has = false;
-                // virtual
-                if (virtualKeys(player.getUniqueId(), crate.key().id()) > 0) {
-                    giveVirtualKeys(player.getUniqueId(), crate.key().id(), -1);
-                    has = true;
-                } else {
-                    // physical tagged keys
+                if (virtualKeys(player.getUniqueId(), crate.key().id()) > 0) { giveVirtualKeys(player.getUniqueId(), crate.key().id(), -1); has = true; }
+                else {
                     int need = 1;
                     for (ItemStack it : player.getInventory().getContents()) {
                         if (it == null || it.getType().isAir()) continue;
@@ -217,25 +220,47 @@ public final class SimpleCrateService implements CrateService {
                         }
                     }
                 }
-                if (!has) {
-                    Messages.msg(player, "<red>You don't have a key for this crate.</red>");
-                    return false;
-                }
+                if (!has) { Messages.msg(player, "<red>You don't have a key for this crate.</red>"); future.complete(false); return; }
             }
 
-            Reward r = crate.picker().pick();
-            // reward grant must happen on main thread
-            Bukkit.getScheduler().runTask(plugin, () -> r.give(player));
+            if (!player.hasPermission("minecrates.open." + crate.id())) { Messages.msg(player, MineCrates.get().configManager().msg("perm.open-deny")); future.complete(false); return; }
 
-            // record stats + cooldown
-            lastReward.put(player.getUniqueId(), r.id());
-            opened.merge(player.getUniqueId(), 1L, Long::sum);
+            CrateOpenEvent openEvent = new CrateOpenEvent(player, crate);
+            Bukkit.getPluginManager().callEvent(openEvent);
+            if (openEvent.isCancelled()) { future.complete(false); return; }
+
+            // set cooldown now
             cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
                     .put(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
 
-            return true;
+            Reward reward = crate.picker().pick();
+            if (reward == null) { future.complete(false); return; }
 
+            OpenAnimationGUI.play(player, crate, reward, r -> {
+                CrateRewardGiveEvent giveEvent = new CrateRewardGiveEvent(player, crate, r);
+                Bukkit.getPluginManager().callEvent(giveEvent);
+                if (!giveEvent.isCancelled()) {
+                    r.give(player, vault);
+                    logRollAsync(player.getUniqueId(), player.getName(), crate.id(), r.id());
+                }
+                lastReward.put(player.getUniqueId(), r.id());
+                opened.merge(player.getUniqueId(), 1L, Long::sum);
+                future.complete(true);
+            });
+        });
+        return future;
+    }
 
+    private void logRollAsync(UUID uuid, String name, String crateId, String rewardId) {
+        CompletableFuture.runAsync(() -> {
+            try {
+                java.nio.file.Path dir = plugin.getDataFolder().toPath().resolve("logs");
+                java.nio.file.Files.createDirectories(dir);
+                java.nio.file.Path f = dir.resolve("rolls.log");
+                String line = java.time.Instant.now() + "," + uuid + "," + name + "," + crateId + "," + rewardId + System.lineSeparator();
+                java.nio.file.Files.write(f, line.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND);
+            } catch (Exception ignored) {}
         });
     }
 
@@ -244,11 +269,25 @@ public final class SimpleCrateService implements CrateService {
 
     @Override
     public ItemStack createKeyItem(String keyId, int amount) {
-        Key k = keys.get(keyId);
+        Key k = keys.get(keyId == null ? null : keyId.toLowerCase(Locale.ROOT));
         if (k == null) return null;
         ItemStack it = k.asItem();
         it.setAmount(Math.max(1, amount));
         return it;
+    }
+
+    @Override
+    public String keyDisplay(String keyId) {
+        if (keyId == null || keyId.isEmpty()) return "";
+        String id = keyId.toLowerCase(Locale.ROOT);
+        for (Crate c : crates.values()) {
+            if (c.key() != null && c.key().id().equalsIgnoreCase(id)) {
+                String ov = c.keyDisplayOverride();
+                if (ov != null && !ov.isBlank()) return ov;
+            }
+        }
+        Key k = keys.get(id);
+        return k == null ? keyId : k.display();
     }
 
     @Override

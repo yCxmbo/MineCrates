@@ -1,6 +1,7 @@
 package me.ycxmbo.minecrates.crate;
 
 import java.util.*;
+import java.util.concurrent.ThreadLocalRandom;
 
 public final class RewardPicker {
     private final List<Reward> rewards;

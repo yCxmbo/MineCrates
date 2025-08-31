@@ -6,7 +6,7 @@
 
     <groupId>me.ycxmbo</groupId>
     <artifactId>minecrates</artifactId>
-    <version>0.9.0</version>
+    <version>1.0.0</version>
     <name>MineCrates</name>
     <description>Modern crates plugin for Paper 1.20.x–1.21.x</description>
     <url>https://example.invalid/minecrates</url>
@@ -46,6 +46,7 @@
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
             <version>${paper.api}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- Adventure MiniMessage (shaded & relocated) -->
@@ -60,6 +61,7 @@
             <groupId>com.github.MilkBowl</groupId>
             <artifactId>VaultAPI</artifactId>
             <version>${vault.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- PlaceholderAPI (soft-depend / compileOnly) -->
@@ -67,6 +69,7 @@
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
             <version>${papi.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- DecentHolograms (soft-depend / compileOnly) -->
@@ -74,6 +77,22 @@
             <groupId>com.github.decentsoftware-eu</groupId>
             <artifactId>decentholograms</artifactId>
             <version>${dh.version}</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Adventure API (compileOnly, provided by Paper) -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.24.0</version>
+        </dependency>
+
+        <!-- Adventure Legacy Serializer for MiniMessage -> legacy conversion -->
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.24.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- (Optional) JUnit for tests -->
@@ -84,6 +103,25 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>papermc</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>jitpack</id>
+            <url>https://jitpack.io/</url>
+        </repository>
+        <repository>
+            <id>placeholderapi</id>
+            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
+        </repository>
+        <repository>
+            <id>decentsoftware</id>
+            <url>https://repo.decentsoftware.eu/artifactory/public/</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>

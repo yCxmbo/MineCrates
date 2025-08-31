@@ -1,12 +1,52 @@
-config-version: 1
-messages:
-  prefix: "<green><b>Mine</b></green><white><b>Crates</b></white> <gray>»</gray> "
+config-version: 3
 
+# Global message settings (MiniMessage)
+messages:
+  prefix: "<gray>[</gray><green>Mine</green><white>Crates</white><gray>]</gray> "
+  reload-success: "<green>Plugin has been reloaded.</green>"
+  reload-failed: "<red>Reload failed:</red> <white><error></white>"
+
+# Crate opening animation preferences (informational)
 animation:
-  type: ROULETTE     # ROULETTE | REVEAL
+  type: ROULETTE   # ROULETTE | REVEAL | CASCADE
   roulette:
-    speed-ticks: 3
-    cycles: 36
+    speed-ticks: 2   # ticks between updates
+    cycles: 40       # number of animation steps
   reveal:
     speed-ticks: 6
     flickers: 16
+  cascade:
+    speed-ticks: 2
+  close-delay-ticks: 20
+
+  # GUI markers/fillers for open animation
+  markers:
+    prize:
+      material: REDSTONE_TORCH
+      name: "<gold>Prize</gold>"
+    filler:
+      material: BLACK_STAINED_GLASS_PANE
+      name: "<gray> </gray>"
+
+# GUI preferences (informational)
+gui:
+  preview:
+    highlight-selected-filter: true
+    show-details: false
+    items-per-page: 45
+    close-slot: 49
+    prev-slot: 52
+    next-slot: 53
+
+# Integrations flags (auto-detected when available)
+integrations:
+  placeholderapi: true
+  vault: true
+  decentholograms: true
+
+rewards:
+  inventory-overflow-policy: drop   # drop | deny
+
+# Holograms behavior (when DecentHolograms is present)
+holograms:
+  refresh-seconds: 15

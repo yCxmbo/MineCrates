@@ -59,6 +59,33 @@ public final class PapiHook {
                 return crate != null ? crate.displayName() : "";
             }
 
+            // %minecrates_crate_display_{id}% (alias of crate_name)
+            if (params.startsWith("crate_display_")) {
+                String crateId = params.substring("crate_display_".length());
+                Crate crate = service.crate(crateId);
+                return crate != null ? crate.displayName() : "";
+            }
+
+            // %minecrates_chance_{crate}_{reward}% -> percent with two decimals
+            if (params.startsWith("chance_")) {
+                String rest = params.substring("chance_".length());
+                int idx = rest.indexOf('_');
+                if (idx > 0) {
+                    String crateId = rest.substring(0, idx);
+                    String rewardId = rest.substring(idx+1);
+                    Crate crate = service.crate(crateId);
+                    if (crate != null) {
+                        for (var r : crate.rewards()) {
+                            if (r.id().equalsIgnoreCase(rewardId)) {
+                                double pct = service.weightPercent(crate, r) * 100.0;
+                                return String.format(java.util.Locale.US, "%.2f", pct);
+                            }
+                        }
+                    }
+                }
+                return "0";
+            }
+
             // %minecrates_key_name_{id}%
             if (params.startsWith("key_name_")) {
                 String keyId = params.substring("key_name_".length());

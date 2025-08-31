@@ -1,15 +1,55 @@
-prefix: "<gray>[<green>MineCrates</green>]</gray> "
+# MineCrates — messages (MiniMessage)
+# Use <tags> for colors and placeholders.
 
-errors:
-  player-only: "<red>Players only.</red>"
-  unknown-crate: "<red>Unknown crate.</red>"
-  need-key: "<yellow>You don't have a key for this crate.</yellow>"
-  on-cooldown: "<yellow>You must wait <white>%sec%s</white> to open this again.</yellow>"
-  no-vault: "<red>Economy is required for this crate.</red>"
-  not-enough-money: "<red>You need <white>$%amount%</white> to open this.</red>"
-  not-bound: "<yellow>This block is not bound to a crate.</yellow>"
+preview:
+  title: "<gold>Preview</gold> <gray>•</gray> <white><crate_display></white> <gray>(<page>/<pages>)</gray>"
+  reward-name: "<yellow><reward_display></yellow>"
+  rarity-line: "<gray>Rarity:</gray> <white><rarity></white>"
+  chance-line: "<gray>Chance:</gray> <white><percent>%</white>"
+  commands-line: "<gray>Commands:</gray> <white><amount></white>"
+  prev: "<gray>Previous</gray>"
+  next: "<gray>Next</gray>"
+  close: "<red>Close</red>"
+  filter:
+    name: "<white>Filter:</white> <yellow><rarity></yellow>"
+  empty:
+    title: "<gray>No rewards</gray>"
+    lore: "<dark_gray>This crate has no rewards.</dark_gray>"
+  crate-missing: "<red>That crate no longer exists.</red>"
 
-info:
-  bound: "<green>Bound <white>%crate%</white> to this block.</green>"
-  unbound: "<green>Crate unbound from this block.</green>"
-  reloaded: "<green>Configs reloaded.</green>"
+cooldown:
+  actionbar: "<red>Cooldown:</red> <white><seconds>s</white>"
+
+reward:
+  inventory-full: "<red>Your inventory is full.</red>"
+
+binds:
+  header: "<gold>Binds</gold><gray>:</gray> <white><count></white>"
+  line: " - <white><world></white> <yellow><x></yellow>,<yellow><y></yellow>,<yellow><z></yellow> <gray>→</gray> <white><crate></white>"
+  unbindhere-done: "<green>Unbound crate from this block.</green>"
+  none: "<gray>No bindings found.</gray>"
+
+perm:
+  open-deny: "<red>You cannot open this crate.</red>"
+  preview-deny: "<red>You cannot preview this crate.</red>"
+
+keys:
+  offline-queued: "<green>Queued</green> <yellow><amount></yellow> <white><key></white> for <white><player></white>."
+
+help:
+  header-top: ""
+  title: "<green>Mine<white>Crates <gray>|</gray> <white>Help</white>"
+  header-bottom: "<gray>• ───────────────── •</gray>"
+  entries:
+    list: "Show loaded crates"
+    preview: "Preview a crate"
+    open: "Open crate (self/other)"
+    givekey: "Give a key to player"
+    giveall: "Give a key to all"
+    set: "Bind targeted block to crate"
+    remove: "Unbind targeted block"
+    testroll: "Simulate n rolls"
+    reload: "Reload configs"
+    editor: "Open crate editor"
+
+# removed duplicate help block with stray content

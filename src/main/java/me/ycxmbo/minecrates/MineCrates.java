@@ -1,6 +1,8 @@
 package me.ycxmbo.minecrates;
 
 import me.ycxmbo.minecrates.command.MineCratesCommand;
+import me.ycxmbo.minecrates.config.ConfigManager;
+import me.ycxmbo.minecrates.gui.PreviewGUI;
 import me.ycxmbo.minecrates.service.CrateService;
 import me.ycxmbo.minecrates.service.impl.SimpleCrateService;
 import me.ycxmbo.minecrates.hook.VaultHook;
@@ -18,6 +20,7 @@ public final class MineCrates extends JavaPlugin {
 
     private static MineCrates INSTANCE;
     private CrateService crateService;
+    private ConfigManager configManager;
     private VaultHook vault;
     private PapiHook papi;
     private HologramManager holograms;
@@ -25,6 +28,7 @@ public final class MineCrates extends JavaPlugin {
 
     public static MineCrates get() { return INSTANCE; }
     public CrateService crates() { return crateService; }
+    public ConfigManager configManager() { return configManager; }
     public VaultHook vault() { return vault; }
     public HologramManager holograms() { return holograms; }
 
@@ -35,6 +39,10 @@ public final class MineCrates extends JavaPlugin {
 
         // Basic self-check
         log.info(() -> "[MineCrates] Booting on " + Bukkit.getVersion());
+        
+        // Configs & messages
+        this.configManager = new ConfigManager(this);
+        this.configManager.load();
 
         // Save default configs (we’ll add more files next drop)
         saveDefaultConfig();
@@ -55,6 +63,8 @@ public final class MineCrates extends JavaPlugin {
         });
 
         getServer().getPluginManager().registerEvents(new BlockBindingListener(crateService), this);
+        // Preview GUI
+        new PreviewGUI(this, crateService, configManager);
         getServer().getPluginManager().registerEvents(new me.ycxmbo.minecrates.gui.EditorListener(), this);
         particles = new RingParticles(this, crateService);
         particles.start();
@@ -80,6 +90,7 @@ public final class MineCrates extends JavaPlugin {
         } catch (Throwable t) {
             getLogger().warning("[MineCrates] Shutdown error: " + t.getMessage());
         }
+        try { if (holograms != null) holograms.shutdown(); } catch (Throwable ignored) {}
         getLogger().info("[MineCrates] Disabled.");
 
         if (particles != null) particles.stop();

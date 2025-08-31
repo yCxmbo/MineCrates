@@ -10,7 +10,7 @@ commands:
   minecrates:
     description: Base command for MineCrates
     usage: "/minecrates help"
-    aliases: [crates, cc]
+    aliases: [crate, cr, crates, cc]
     permission: minecrates.use
 
 permissions:
@@ -44,6 +44,10 @@ permissions:
 
   minecrates.set:
     description: Bind a crate to the targeted block
+    default: op
+
+  minecrates.remove:
+    description: Unbind a crate from the targeted block
     default: op
 
   minecrates.reload:

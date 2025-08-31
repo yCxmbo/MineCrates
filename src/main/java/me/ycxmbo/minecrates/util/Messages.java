@@ -10,5 +10,22 @@ public final class Messages {
         to.sendMessage(MM.deserialize(mm));
     }
 
+    /**
+     * Send a command response with the configurable prefix from config.yml (messages.prefix).
+     * Keeps existing MiniMessage formatting for the message body.
+     */
+    public static void cmd(CommandSender to, String mm) {
+        String prefix;
+        try {
+            prefix = me.ycxmbo.minecrates.MineCrates.get()
+                    .configManager()
+                    .config()
+                    .getString("messages.prefix", "");
+        } catch (Throwable t) {
+            prefix = ""; // fallback if plugin not initialized
+        }
+        to.sendMessage(MM.deserialize((prefix == null ? "" : prefix) + (mm == null ? "" : mm)));
+    }
+
     private Messages(){}
 }

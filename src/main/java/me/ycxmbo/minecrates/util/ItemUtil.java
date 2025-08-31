@@ -1,6 +1,8 @@
 package me.ycxmbo.minecrates.util;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.ConfigurationSection;
@@ -11,9 +13,11 @@ import org.bukkit.persistence.PersistentDataType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public final class ItemUtil {
     private static final MiniMessage MM = MiniMessage.miniMessage();
+    private static final LegacyComponentSerializer LEGACY_AMP = LegacyComponentSerializer.legacyAmpersand();
     private static final NamespacedKey KEY_TAG = NamespacedKey.fromString("minecrates:key");
 
     public static ItemStack itemFromSection(ConfigurationSection sec) {
@@ -26,20 +30,46 @@ public final class ItemUtil {
         return it;
     }
 
-    public static void applyName(ItemStack it, String mmName) {
-        if (it == null || mmName == null || mmName.isEmpty()) return;
+    public static void applyName(ItemStack it, String name) {
+        if (it == null || name == null || name.isEmpty()) return;
         ItemMeta meta = it.getItemMeta();
-        meta.displayName(MM.deserialize(mmName));
+        var comp = (name.indexOf('&') >= 0 || name.indexOf('§') >= 0)
+                ? LEGACY_AMP.deserialize(name)
+                : MM.deserialize(name);
+        meta.displayName(comp.decoration(TextDecoration.ITALIC, false));
         it.setItemMeta(meta);
     }
 
-    public static void applyLore(ItemStack it, List<String> mmLore) {
-        if (it == null || mmLore == null || mmLore.isEmpty()) return;
+    public static void applyLore(ItemStack it, List<String> lore) {
+        if (it == null || lore == null || lore.isEmpty()) return;
         ItemMeta meta = it.getItemMeta();
         List<net.kyori.adventure.text.Component> lines = new ArrayList<>();
-        for (String s : mmLore) lines.add(MM.deserialize(s));
+        for (String s : lore) {
+            var comp = (s != null && (s.indexOf('&') >= 0 || s.indexOf('§') >= 0))
+                    ? LEGACY_AMP.deserialize(s)
+                    : MM.deserialize(s == null ? "" : s);
+            lines.add(comp.decoration(TextDecoration.ITALIC, false));
+        }
         meta.lore(lines);
         it.setItemMeta(meta);
+    }
+
+    public static String prettyMaterialName(Material mat) {
+        if (mat == null) return "";
+        String base = mat.name().toLowerCase(Locale.ROOT).replace('_', ' ');
+        StringBuilder sb = new StringBuilder(base.length());
+        boolean cap = true;
+        for (int i = 0; i < base.length(); i++) {
+            char c = base.charAt(i);
+            if (cap && Character.isLetter(c)) {
+                sb.append(Character.toUpperCase(c));
+                cap = false;
+            } else {
+                sb.append(c);
+            }
+            if (c == ' ') cap = true;
+        }
+        return sb.toString();
     }
 
     public static void tagKey(ItemStack it, String keyId) {

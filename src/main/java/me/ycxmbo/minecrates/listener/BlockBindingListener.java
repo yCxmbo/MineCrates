@@ -64,6 +64,18 @@ public final class BlockBindingListener implements Listener {
             return;
         }
 
+        // LEFT_CLICK previews the crate (non-sneaking)
+        if (e.getAction() == Action.LEFT_CLICK_BLOCK) {
+            e.setCancelled(true);
+            if (!p.hasPermission("minecrates.preview." + crate.id())) {
+                Messages.msg(p, me.ycxmbo.minecrates.MineCrates.get().configManager().msg("perm.preview-deny"));
+                return;
+            }
+            // open preview menu
+            me.ycxmbo.minecrates.gui.PreviewGUI.open(p, null, crate);
+            return;
+        }
+
         // RIGHT_CLICK opens (or pushback if no key)
         if (e.getAction() == Action.RIGHT_CLICK_BLOCK) {
             e.setCancelled(true);
@@ -81,7 +93,10 @@ public final class BlockBindingListener implements Listener {
                 Messages.msg(p, "<gray>[MineCrates]</gray> <red>You don't have a key to open this crate.</red>");
                 return;
             }
-
+            if (!p.hasPermission("minecrates.open." + crate.id())) {
+                Messages.msg(p, me.ycxmbo.minecrates.MineCrates.get().configManager().msg("perm.open-deny"));
+                return;
+            }
             service.open(p, crate);
         }
     }

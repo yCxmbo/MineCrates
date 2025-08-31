@@ -2,3 +2,5 @@
 keys:
   mystic_key:
     material: TRIPWIRE_HOOK
+    display: "<gradient:#FFB84D:#FFD480>Mystic Key</gradient>" #MiniMessage Color Support
+#    key-display: "" #Legacy Color Support

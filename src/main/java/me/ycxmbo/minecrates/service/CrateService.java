@@ -36,6 +36,7 @@ public interface CrateService {
     // Keys
     Set<String> keyIds();
     ItemStack createKeyItem(String keyId, int amount);
+    String keyDisplay(String keyId);
     void giveVirtualKeys(UUID playerId, String keyId, int amount);
     int virtualKeys(UUID playerId, String keyId);
 

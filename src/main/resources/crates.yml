@@ -11,10 +11,30 @@ crates:
       amount: 1000        # money or exp/levels
     hologram:
       enabled: true
-      y-offset: 1.25
+      y-offset: 2.3
       lines:
-        - "<gradient:#8A2BE2:#00FFFF><b>Mystic Crate</b></gradient>"
-        - "<gray>Right-click with a key</gray>"
+        - "<gradient:#D84AFF:#A64DFF><b>Mystic Crate</b></gradient>"
+        - "<light_purple>Left Click to Preview</light_purple>"
+        - "<light_purple>Right Click to Open</light_purple>"
+        - "<gray>yourserver.com</gray>"
+    particles:
+      enabled: true
+      shape: RING         # RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1.5         # ring radius around the crate
+      y-offset: 0.5       # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
     rewards:
       diamond_pack:
         weight: 35
@@ -30,6 +50,7 @@ crates:
         rarity: LEGENDARY
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        display: "Legendary Sword"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
         items:
