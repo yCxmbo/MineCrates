@@ -38,7 +38,6 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
         Messages.msg(to, cfg.msg("help.header-bottom"));
 
         Messages.msg(to, helpLine(label, "list", cfg.msg("help.entries.list"), true, true));
-        Messages.msg(to, helpLineSuggest(label, "preview ", cfg.msg("help.entries.preview"), hasPerm(to, "minecrates.preview")));
         Messages.msg(to, helpLineSuggest(label, "open ", cfg.msg("help.entries.open"), hasPerm(to, "minecrates.open")));
         Messages.msg(to, helpLineSuggest(label, "givekey ", cfg.msg("help.entries.givekey"), hasPerm(to, "minecrates.givekey")));
         Messages.msg(to, helpLineSuggest(label, "giveall ", cfg.msg("help.entries.giveall"), hasPerm(to, "minecrates.giveall")));
@@ -65,9 +64,9 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             case "list" -> {
                 Collection<Crate> crates = service.crates();
                 if (crates.isEmpty()) {
-                    Messages.cmd(sender, "<gray>━━━</gray>");
+                    Messages.cmd(sender, "<gray>-</gray> <gray>No crates loaded</gray>");
                 } else {
-                    String ids = crates.stream().map(Crate::id).sorted().collect(Collectors.joining("<gray>━━━</gray>"));
+                    String ids = crates.stream().map(Crate::id).sorted().collect(Collectors.joining("<gray> * </gray>"));
                     Messages.cmd(sender, "<green>Loaded crates:</green> <white>" + ids + "</white>");
                 }
             }
@@ -329,6 +328,9 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
         return "<click:suggest_command:" + cmd + "><hover:show_text:'" + desc + "'><white>" + cmd + "</white></hover></click> <gray>—</gray> <gray>" + desc + "</gray>";
     }
 }
+
+
+
 
 
 

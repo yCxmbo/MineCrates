@@ -11,8 +11,8 @@ import java.util.List;
  */
 public final class RewardPickerTest {
     public static void devCheck() {
-        Reward r1 = new Reward("a", "a", 1.0, Reward.Rarity.COMMON, List.of(), List.of(), false, null, 0D, 0);
-        Reward r2 = new Reward("b", "b", 3.0, Reward.Rarity.RARE, List.of(), List.of(), false, null, 0D, 0);
+        Reward r1 = new Reward("a", "a", 1.0, Reward.Rarity.COMMON, null, List.of(), List.of(), false, null, 0D, 0);
+        Reward r2 = new Reward("b", "b", 3.0, Reward.Rarity.RARE, null, List.of(), List.of(), false, null, 0D, 0);
 
         RewardPicker picker = new RewardPicker(List.of(r1, r2));
         int a=0,b=0;

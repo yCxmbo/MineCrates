@@ -98,7 +98,9 @@ public final class PreviewGUI implements Listener {
         int slot = 0;
         for (int i = start; i < endExclusive; i++) {
             Reward r = rewards.get(i);
-            ItemStack icon = r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone();
+            ItemStack icon = r.displayItem() != null
+                    ? r.displayItem()
+                    : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
 
             List<String> lore = new ArrayList<>();
             double pct = service.weightPercent(crate, r) * 100.0;
@@ -141,10 +143,11 @@ public final class PreviewGUI implements Listener {
 
         // Filter bar (45..48)
         int bar = 45;
+        boolean highlight = plugin.getConfig().getBoolean("gui.preview.highlight-selected-filter", true);
         for (Reward.Rarity rr : Reward.Rarity.values()) {
             ItemStack it = new ItemStack(RARITY_ICONS.getOrDefault(rr, Material.GRAY_STAINED_GLASS_PANE));
             ItemUtil.applyName(it, config.msg("preview.filter.name", Map.of("rarity", rr.name())));
-            if (filter == rr) {
+            if (highlight && filter == rr) {
                 try {
                     it.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.UNBREAKING, 1);
                 } catch (Throwable ignored) {}
@@ -152,21 +155,26 @@ public final class PreviewGUI implements Listener {
             inv.setItem(bar++, it);
         }
 
-        // Close (49)
+        // Navigation slots from config
+        int closeSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.close-slot", 49)));
+        int prevSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.prev-slot", 52)));
+        int nextSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.next-slot", 53)));
+
+        // Close
         ItemStack close = new ItemStack(Material.BARRIER);
         ItemUtil.applyName(close, config.msg("preview.close"));
-        inv.setItem(49, close);
+        inv.setItem(closeSlot, close);
 
         // Prev/Next (52/53)
-        if (start > 0) {
+        if (start > 0 && prevSlot < SIZE) {
             ItemStack prev = new ItemStack(Material.ARROW);
             ItemUtil.applyName(prev, config.msg("preview.prev"));
-            inv.setItem(52, prev);
+            inv.setItem(prevSlot, prev);
         }
-        if (endExclusive < rewards.size()) {
+        if (endExclusive < rewards.size() && nextSlot < SIZE) {
             ItemStack next = new ItemStack(Material.ARROW);
             ItemUtil.applyName(next, config.msg("preview.next"));
-            inv.setItem(53, next);
+            inv.setItem(nextSlot, next);
         }
 
         player.openInventory(inv);
@@ -191,16 +199,20 @@ public final class PreviewGUI implements Listener {
         if (slot < 0 || slot >= SIZE) return; // only our GUI
 
         // Navigation
-        if (slot == 49) { // close
+        int closeSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.close-slot", 49)));
+        int prevSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.prev-slot", 52)));
+        int nextSlot = Math.max(0, Math.min(SIZE-1, plugin.getConfig().getInt("gui.preview.next-slot", 53)));
+
+        if (slot == closeSlot) { // close
             player.closeInventory();
             return;
         }
-        if (slot == 52) { // prev
+        if (slot == prevSlot) { // prev
             int delta = e.isShiftClick() ? 5 : 1;
             open(player, crate, Math.max(1, holder.page - delta), holder.filter);
             return;
         }
-        if (slot == 53) { // next
+        if (slot == nextSlot) { // next
             int delta = e.isShiftClick() ? 5 : 1;
             open(player, crate, holder.page + delta, holder.filter);
             return;

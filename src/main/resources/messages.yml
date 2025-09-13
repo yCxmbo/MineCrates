@@ -1,4 +1,4 @@
-# MineCrates — messages (MiniMessage)
+# MineCrates messages (MiniMessage)
 # Use <tags> for colors and placeholders.
 
 preview:
@@ -25,7 +25,7 @@ reward:
 
 binds:
   header: "<gold>Binds</gold><gray>:</gray> <white><count></white>"
-  line: " - <white><world></white> <yellow><x></yellow>,<yellow><y></yellow>,<yellow><z></yellow> <gray>→</gray> <white><crate></white>"
+  line: " - <white><world></white> <yellow><x></yellow>,<yellow><y></yellow>,<yellow><z></yellow> <gray>-></gray> <white><crate></white>"
   unbindhere-done: "<green>Unbound crate from this block.</green>"
   none: "<gray>No bindings found.</gray>"
 
@@ -39,7 +39,7 @@ keys:
 help:
   header-top: ""
   title: "<green>Mine<white>Crates <gray>|</gray> <white>Help</white>"
-  header-bottom: "<gray>• ───────────────── •</gray>"
+  header-bottom: "<gray>------------------------------</gray>"
   entries:
     list: "Show loaded crates"
     preview: "Preview a crate"
@@ -52,4 +52,3 @@ help:
     reload: "Reload configs"
     editor: "Open crate editor"
 
-# removed duplicate help block with stray content

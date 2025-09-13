@@ -46,6 +46,7 @@ public final class CrateEditGUI implements InventoryHolder {
     // Hologram
     private boolean holoEnabled;
     private double holoYOffset;
+    private java.util.List<String> holoLines;
 
     // Animation (per-crate)
     private Crate.AnimationType animType;
@@ -62,22 +63,145 @@ public final class CrateEditGUI implements InventoryHolder {
     private final Inventory inv;
     private String newKeyId;
 
+    // Crate meta
+    private Crate.Type crateType;
+    private String crateDisplay;
+
     private static final int REWARD_START = 9;
     private static final int REWARD_END = 45; // exclusive
 
-    private final List<EditedReward> rewards = new ArrayList<>();
+    final List<EditedReward> rewards = new ArrayList<>();
 
-    private static final class EditedReward {
-        ItemStack icon;
+    static final class EditedReward {
+        ItemStack icon;          // display icon (not necessarily a given item)
         double weight;
         Reward.Rarity rarity;
         boolean announce;
-        EditedReward(ItemStack icon, double weight, Reward.Rarity rarity, boolean announce) {
+        boolean commandOnly;     // if true, do not give items (commands/money/xp only)
+        String display;          // MiniMessage-formatted display title (nullable)
+        List<ItemStack> items = new ArrayList<>();
+        List<String> commands = new ArrayList<>();
+        String message = "";
+        double money = 0D;
+        int xpLevels = 0;
+        EditedReward(ItemStack icon, double weight, Reward.Rarity rarity, boolean announce, boolean commandOnly, String display) {
             this.icon = icon == null ? new ItemStack(Material.CHEST) : icon.clone();
             this.weight = Math.max(0.0001, weight);
             this.rarity = rarity == null ? Reward.Rarity.COMMON : rarity;
             this.announce = announce;
+            this.commandOnly = commandOnly;
+            this.display = (display == null || display.isBlank()) ? null : display;
         }
+    }
+
+    // Chat rename support for reward display (MiniMessage)
+    private static final java.util.Map<java.util.UUID, RenameSession> RENAME_SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
+    private record RenameSession(CrateEditGUI gui, int index) {}
+
+    private void startRename(org.bukkit.entity.Player player, int index) {
+        RENAME_SESSIONS.put(player.getUniqueId(), new RenameSession(this, index));
+        Messages.msg(player, "<gray>Type the new reward name in chat.</gray> <white>MiniMessage</white> supported. Type '-' to clear.");
+    }
+
+    public static boolean handleChatRename(org.bukkit.entity.Player player, String input) {
+        RenameSession s = RENAME_SESSIONS.remove(player.getUniqueId());
+        if (s == null) return false;
+        MineCrates pl = MineCrates.get();
+        if (pl == null) return false;
+        org.bukkit.Bukkit.getScheduler().runTask(pl, () -> {
+            try {
+                CrateEditGUI gui = s.gui();
+                if (gui == null) return;
+                int idx = s.index();
+                String normalized = (input == null ? "" : input.trim());
+                if (idx >= 0) {
+                    if (idx >= gui.rewards.size()) return;
+                    EditedReward er = gui.rewards.get(idx);
+                    if (normalized.equalsIgnoreCase("-") || normalized.equalsIgnoreCase("clear")) {
+                        er.display = null; // revert to default
+                        Messages.msg(player, "<yellow>Cleared</yellow> reward display name.");
+                    } else {
+                        er.display = normalized; // store MiniMessage string
+                        Messages.msg(player, "<green>Set</green> reward name to: " + normalized);
+                    }
+                    gui.redrawRewards();
+                } else {
+                    // idx < 0 means crate display rename
+                    if (normalized.equalsIgnoreCase("-") || normalized.equalsIgnoreCase("clear")) {
+                        gui.crateDisplay = null;
+                        Messages.msg(player, "<yellow>Cleared</yellow> crate display.");
+                    } else {
+                        gui.crateDisplay = normalized;
+                        Messages.msg(player, "<green>Set</green> crate name to: " + normalized);
+                    }
+                    gui.rebuildTop();
+                }
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
+        });
+        return true;
+    }
+
+    private void startCrateRename(org.bukkit.entity.Player player) {
+        // use index -1 to denote crate rename
+        RENAME_SESSIONS.put(player.getUniqueId(), new RenameSession(this, -1));
+        Messages.msg(player, "<gray>Type the new crate display in chat.</gray> <white>MiniMessage</white> supported. '-' to clear.");
+    }
+
+    // separate handler to allow EditorListener to check without consuming reward rename session
+    public static boolean handleChatCrateRename(org.bukkit.entity.Player player, String input) {
+        RenameSession s = RENAME_SESSIONS.get(player.getUniqueId());
+        if (s == null || s.index() >= 0) return false; // not a crate rename
+        // delegate to main handler to consume and apply
+        return handleChatRename(player, input);
+    }
+
+    // Hologram lines editor (chat, multiline)
+    private static final java.util.Map<java.util.UUID, HoloSession> HOLO_SESSIONS = new java.util.concurrent.ConcurrentHashMap<>();
+    private record HoloSession(CrateEditGUI gui, java.util.List<String> lines) {}
+
+    private void startHologramLinesEdit(org.bukkit.entity.Player player) {
+        java.util.List<String> tmp = new java.util.ArrayList<>();
+        if (holoLines != null) tmp.addAll(holoLines);
+        HOLO_SESSIONS.put(player.getUniqueId(), new HoloSession(this, tmp));
+        Messages.msg(player, "<gray>Editing hologram lines.</gray> Send lines one by one. Type 'done' to finish, 'clear' to empty, or 'cancel'. MiniMessage supported.");
+        player.closeInventory();
+    }
+
+    public static boolean handleChatHologramLines(org.bukkit.entity.Player player, String msg) {
+        HoloSession s = HOLO_SESSIONS.get(player.getUniqueId());
+        if (s == null) return false;
+        if (msg == null) msg = "";
+        String m = msg.trim();
+        if (m.equalsIgnoreCase("cancel")) {
+            HOLO_SESSIONS.remove(player.getUniqueId());
+            Messages.msg(player, "<gray>Cancelled.</gray>");
+            org.bukkit.Bukkit.getScheduler().runTask(MineCrates.get(), () -> {
+                if (s.gui() != null) s.gui().open((org.bukkit.entity.Player) player);
+            });
+            return true;
+        }
+        if (m.equalsIgnoreCase("clear")) {
+            s.lines().clear();
+            Messages.msg(player, "<yellow>Cleared</yellow> hologram lines.");
+            return true;
+        }
+        if (m.equalsIgnoreCase("done")) {
+            HOLO_SESSIONS.remove(player.getUniqueId());
+            CrateEditGUI gui = s.gui();
+            if (gui != null) {
+                gui.holoLines = new java.util.ArrayList<>(s.lines());
+                org.bukkit.Bukkit.getScheduler().runTask(MineCrates.get(), gui::rebuildTop);
+                org.bukkit.Bukkit.getScheduler().runTask(MineCrates.get(), () -> gui.open((org.bukkit.entity.Player) player));
+            }
+            Messages.msg(player, "<green>Hologram lines saved.</green>");
+            return true;
+        }
+        // regular line
+        s.lines().add(msg);
+        Messages.msg(player, "<gray>Added line:</gray> " + msg);
+        return true;
     }
 
     public CrateEditGUI(MineCrates plugin, CrateService service, Crate crate) {
@@ -102,6 +226,7 @@ public final class CrateEditGUI implements InventoryHolder {
         // hologram snapshot
         this.holoEnabled = crate.hologramEnabled();
         this.holoYOffset = crate.hologramYOffset();
+        this.holoLines = new ArrayList<>(crate.holoLines());
 
         // animation snapshot
         this.animType = crate.animationType();
@@ -115,6 +240,10 @@ public final class CrateEditGUI implements InventoryHolder {
         // key display override
         this.keyDisplayOverrideEnabled = crate.keyDisplayOverride() != null;
         this.keyDisplayOverride = crate.keyDisplayOverride();
+
+        // crate meta snapshot
+        this.crateType = crate.type();
+        this.crateDisplay = crate.displayName();
         build(crate);
     }
 
@@ -125,8 +254,18 @@ public final class CrateEditGUI implements InventoryHolder {
         // Load rewards into editable list
         rewards.clear();
         for (Reward r : crate.rewards()) {
-            ItemStack it = r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone();
-            rewards.add(new EditedReward(it, r.weight(), r.rarity(), r.announce()));
+            ItemStack it = r.displayItem() != null ? r.displayItem().clone()
+                    : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
+            boolean cmdOnly = r.items() == null || r.items().isEmpty();
+            EditedReward er = new EditedReward(it, r.weight(), r.rarity(), r.announce(), cmdOnly, r.displayName());
+            // Load item list
+            for (ItemStack ri : r.items()) if (ri != null && !ri.getType().isAir()) er.items.add(ri.clone());
+            // Load commands/message/money/xp
+            er.commands.addAll(r.commands());
+            er.message = r.message();
+            er.money = r.money();
+            er.xpLevels = r.expLevels();
+            rewards.add(er);
         }
         redrawRewards();
         // Controls bottom row: add/save/close
@@ -165,9 +304,24 @@ public final class CrateEditGUI implements InventoryHolder {
         inv.setItem(3, item(Material.CLOCK, "<yellow>Cooldown:</yellow> <white>" + cooldownSeconds + "s</white>", cdLore));
 
         // Slot 4: Hologram
-        List<String> hLore = List.of("<gray>Left/Right:</gray> y-offset +/- 0.1", "<gray>Middle:</gray> toggle enabled");
+        List<String> hLore = new ArrayList<>();
+        hLore.add("<gray>Left/Right:</gray> y-offset +/- 0.1");
+        hLore.add("<gray>Middle:</gray> toggle enabled");
+        hLore.add("<gray>Ctrl+Drop:</gray> edit lines (MiniMessage)");
+        hLore.add("<gray>Lines:</gray> <white>" + (holoLines == null ? 0 : holoLines.size()) + "</white>");
         String hName = holoEnabled ? ("<yellow>Hologram:</yellow> <white>enabled</white> <gray>y=" + String.format(java.util.Locale.US, "%.1f", holoYOffset) + "</gray>") : "<red>Hologram disabled</red>";
         inv.setItem(4, item(holoEnabled ? Material.NAME_TAG : Material.GRAY_DYE, hName, hLore));
+
+        // Slot 7: Crate meta (display + type)
+        List<String> mLore = new ArrayList<>();
+        mLore.add("<gray>Left:</gray> edit display (MiniMessage)");
+        mLore.add("<gray>Right:</gray> clear to id");
+        mLore.add("<gray>Middle:</gray> cycle type");
+        String mName = "<yellow>Crate:</yellow> <white>" + (crateDisplay == null || crateDisplay.isBlank() ? crateId : crateDisplay) + "</white> <gray>(" + crateType + ")</gray>";
+        inv.setItem(7, item(Material.WRITABLE_BOOK, mName, mLore));
+
+        // Slot 8: Hologram refresh
+        inv.setItem(8, item(Material.GLOWSTONE_DUST, "<yellow>Refresh Holograms</yellow>", List.of("<gray>Click:</gray> refresh crate holograms")));
 
         // Slot 5: Animation
         List<String> aLore = new ArrayList<>();
@@ -267,6 +421,24 @@ public final class CrateEditGUI implements InventoryHolder {
             if (e.getClick() == ClickType.MIDDLE) { holoEnabled = !holoEnabled; }
             else if (e.isLeftClick()) { holoYOffset += 0.1; }
             else if (e.isRightClick()) { holoYOffset -= 0.1; }
+            else if (e.getClick() == ClickType.CONTROL_DROP) {
+                boolean ok = BookEditManager.startHologramLines((Player)e.getWhoClicked(), this, holoLines);
+                if (!ok) { startHologramLinesEdit((Player) e.getWhoClicked()); }
+                return;
+            }
+            rebuildTop();
+            return;
+        }
+        if (slot == 7) {
+            e.setCancelled(true);
+            if (e.getClick() == ClickType.MIDDLE) {
+                Crate.Type[] ts = Crate.Type.values();
+                crateType = ts[(crateType.ordinal() + 1) % ts.length];
+            } else if (e.isLeftClick()) {
+                startCrateRename((Player) e.getWhoClicked());
+            } else if (e.isRightClick()) {
+                crateDisplay = null;
+            }
             rebuildTop();
             return;
         }
@@ -307,9 +479,15 @@ public final class CrateEditGUI implements InventoryHolder {
             rebuildTop();
             return;
         }
+        if (slot == 8) {
+            e.setCancelled(true);
+            refreshHolograms();
+            Messages.msg(e.getWhoClicked(), "<green>Holograms refreshed.</green>");
+            return;
+        }
         if (slot == 45) { // add reward
             e.setCancelled(true);
-            rewards.add(new EditedReward(new ItemStack(Material.CHEST), 1.0, Reward.Rarity.COMMON, false));
+            rewards.add(new EditedReward(new ItemStack(Material.CHEST), 1.0, Reward.Rarity.COMMON, false, false, null));
             redrawRewards();
             return;
         }
@@ -332,6 +510,15 @@ public final class CrateEditGUI implements InventoryHolder {
                 // cycle rarity
                 Reward.Rarity[] rs = Reward.Rarity.values();
                 er.rarity = rs[(er.rarity.ordinal() + 1) % rs.length];
+            } else if (e.getClick() == ClickType.SWAP_OFFHAND) {
+                // toggle command-only (items disabled)
+                er.commandOnly = !er.commandOnly;
+            } else if (e.getClick() == ClickType.CONTROL_DROP) {
+                // start chat-based rename with MiniMessage support
+                startRename((Player) e.getWhoClicked(), idx);
+            } else if (!e.isShiftClick() && e.isRightClick() && (e.getCursor() == null || e.getCursor().getType() == Material.AIR)) {
+                // Open detailed editor
+                new RewardDetailGUI(this, idx).open((Player) e.getWhoClicked());
             } else if (e.isLeftClick() && e.getCursor() != null && e.getCursor().getType() != Material.AIR) {
                 // set icon from cursor
                 er.icon = e.getCursor().clone();
@@ -359,6 +546,8 @@ public final class CrateEditGUI implements InventoryHolder {
             String base = "crates." + crateId;
             y.set(base + ".requires-key", requiresKey);
             if (requiresKey) y.set(base + ".key", keyId); else y.set(base + ".key", null);
+            y.set(base + ".display", (crateDisplay == null || crateDisplay.isBlank()) ? null : crateDisplay);
+            y.set(base + ".type", crateType.name());
             y.set(base + ".cost.enabled", costEnabled);
             y.set(base + ".cost.currency", costCurrency.name());
             y.set(base + ".cost.amount", costAmount);
@@ -369,9 +558,42 @@ public final class CrateEditGUI implements InventoryHolder {
                 String rPath = base + ".rewards.reward" + idx;
                 y.set(rPath + ".weight", er.weight);
                 y.set(rPath + ".rarity", er.rarity.name());
-                if (er.announce) y.set(rPath + ".announce", true);
-                y.set(rPath + ".items.i0.material", er.icon.getType().name());
-                y.set(rPath + ".items.i0.amount", Math.max(1, er.icon.getAmount()));
+                y.set(rPath + ".announce", er.announce);
+                // Reward message, money, xp
+                y.set(rPath + ".message", (er.message == null || er.message.isBlank()) ? null : er.message);
+                y.set(rPath + ".money", Math.max(0D, er.money));
+                y.set(rPath + ".xp-levels", Math.max(0, er.xpLevels));
+                // Save separate display item used for GUI/animation
+                y.set(rPath + ".display-item.material", er.icon.getType().name());
+                y.set(rPath + ".display-item.amount", Math.max(1, er.icon.getAmount()));
+                // Save reward display name from editor field (MiniMessage)
+                if (er.display != null && ! er.display.isBlank()) {
+                    y.set(rPath + ".display", er.display);
+                }
+                // Commands
+                if (er.commands == null || er.commands.isEmpty()) y.set(rPath + ".commands", null);
+                else y.set(rPath + ".commands", new java.util.ArrayList<>(er.commands));
+
+                // Items: only if not command-only
+                if (!er.commandOnly) {
+                    // write list
+                    if (er.items == null || er.items.isEmpty()) {
+                        y.set(rPath + ".items", null);
+                    } else {
+                        // clear and write i1..iN
+                        y.set(rPath + ".items", null);
+                        int i = 1;
+                        for (ItemStack it : er.items) {
+                            if (it == null || it.getType().isAir()) continue;
+                            String ip = rPath + ".items.i" + i;
+                            y.set(ip + ".material", it.getType().name());
+                            y.set(ip + ".amount", Math.max(1, it.getAmount()));
+                            i++;
+                        }
+                    }
+                } else {
+                    y.set(rPath + ".items", null);
+                }
                 idx++;
             }
             // particles
@@ -385,6 +607,7 @@ public final class CrateEditGUI implements InventoryHolder {
             // hologram
             y.set(base + ".hologram.enabled", holoEnabled);
             y.set(base + ".hologram.y-offset", holoYOffset);
+            if (holoLines == null || holoLines.isEmpty()) y.set(base + ".hologram.lines", null); else y.set(base + ".hologram.lines", new java.util.ArrayList<>(holoLines));
 
             // animation
             y.set(base + ".animation.type", animType.name());
@@ -409,7 +632,12 @@ public final class CrateEditGUI implements InventoryHolder {
                 ky.save(kf);
             }
 
-            service.reloadAllAsync();
+            java.util.concurrent.CompletableFuture<Void> fut = service.reloadAllAsync();
+            fut.whenComplete((v, ex) -> {
+                org.bukkit.Bukkit.getScheduler().runTask(MineCrates.get(), () -> {
+                    try { refreshHolograms(); } catch (Throwable ignored) {}
+                });
+            });
             Messages.msg(p, "<green>Crate saved.</green>");
         } catch (Exception ex) {
             Messages.msg(p, "<red>Save failed:</red> " + ex.getMessage());
@@ -443,8 +671,15 @@ public final class CrateEditGUI implements InventoryHolder {
             ItemStack icon = er.icon.clone();
             ItemMeta meta = icon.getItemMeta();
             List<Component> lore = new ArrayList<>();
+            String shown = (er.display == null ? "<gray>(default)</gray>" : er.display);
+            lore.add(MM.deserialize("<gray>Name:</gray> " + shown));
             lore.add(MM.deserialize("<gray>Rarity:</gray> <white>" + er.rarity.name() + "</white>"));
             lore.add(MM.deserialize("<gray>Weight:</gray> <white>" + String.format(java.util.Locale.US, "%.1f", er.weight) + "</white>"));
+            lore.add(MM.deserialize("<gray>Command-only:</gray> <white>" + (er.commandOnly ? "yes" : "no") + "</white>"));
+            lore.add(MM.deserialize("<gray>Swap-Offhand:</gray> <white>toggle command-only</white>"));
+            lore.add(MM.deserialize("<gray>Cursor+Left:</gray> <white>set display item</white>"));
+            lore.add(MM.deserialize("<gray>Ctrl+Drop:</gray> <white>edit name (MiniMessage)</white>"));
+            lore.add(MM.deserialize("<gray>Right (no shift):</gray> <white>open details</white>"));
             lore.add(MM.deserialize("<gray>Left/Right:</gray> <white>+/– weight</white>"));
             lore.add(MM.deserialize("<gray>Shift:</gray> <white>x10 step</white>"));
             lore.add(MM.deserialize("<gray>Middle:</gray> <white>cycle rarity</white>"));
@@ -454,4 +689,22 @@ public final class CrateEditGUI implements InventoryHolder {
             inv.setItem(slot++, icon);
         }
     }
+
+    private void refreshHolograms() {
+        try {
+            var holo = MineCrates.get().holograms();
+            if (holo == null) return;
+            for (var e : service.allBindings().entrySet()) {
+                if (crateId.equalsIgnoreCase(e.getValue())) {
+                    holo.upsert(e.getKey(), service.crate(crateId));
+                }
+            }
+        } catch (Throwable ignored) {}
+    }
+
+    // Expose minimal helpers for detail GUI
+    public EditedReward rewardAt(int index) { return (index < 0 || index >= rewards.size()) ? null : rewards.get(index); }
+    public void refreshRewards() { redrawRewards(); }
+    public void setHologramLines(java.util.List<String> lines) { this.holoLines = new java.util.ArrayList<>(lines == null ? java.util.List.of() : lines); }
+    public void refreshTop() { rebuildTop(); }
 }

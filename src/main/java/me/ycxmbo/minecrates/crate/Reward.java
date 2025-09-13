@@ -18,6 +18,7 @@ public final class Reward {
     private final String display;
     private final double weight;
     private final Rarity rarity;
+    private final ItemStack displayItem; // optional separate display icon
     private final List<ItemStack> items;
     private final List<String> commands;
     private final boolean announce;
@@ -25,13 +26,14 @@ public final class Reward {
     private final double money; // optional Vault payout
     private final int expLevels; // optional XP levels
 
-    public Reward(String id, String display, double weight, Rarity rarity, List<ItemStack> items,
+    public Reward(String id, String display, double weight, Rarity rarity, ItemStack displayItem, List<ItemStack> items,
                   List<String> commands, boolean announce, String message,
                   double money, int expLevels) {
         this.id = id;
         this.display = (display == null || display.isEmpty()) ? id : display;
         this.weight = Math.max(0.00001, weight);
         this.rarity = rarity == null ? Rarity.COMMON : rarity;
+        this.displayItem = displayItem == null ? null : displayItem.clone();
         this.items = Collections.unmodifiableList(new ArrayList<>(items == null ? List.of() : items));
         this.commands = Collections.unmodifiableList(new ArrayList<>(commands == null ? List.of() : commands));
         this.announce = announce;
@@ -44,10 +46,13 @@ public final class Reward {
     public String displayName() { return display; }
     public double weight() { return weight; }
     public Rarity rarity() { return rarity; }
+    public ItemStack displayItem() { return displayItem == null ? null : displayItem.clone(); }
     public List<ItemStack> items() { return items; }
     public List<String> commands() { return commands; }
     public boolean announce() { return announce; }
     public String message() { return message; }
+    public double money() { return money; }
+    public int expLevels() { return expLevels; }
 
     public void give(Player p, VaultHook vault) {
         // items
@@ -78,7 +83,7 @@ public final class Reward {
         }
         // messages
         if (!message.isEmpty()) Messages.msg(p, message);
-        if (announce) Bukkit.broadcast(MessageFormatter.winBroadcast(p.getName(), id), ""); // no perm gate
+        if (announce) Bukkit.broadcast(MessageFormatter.winBroadcast(p.getName(), display), ""); // use display name
     }
 
     public static Reward fromSection(String id, ConfigurationSection sec) {
@@ -90,6 +95,11 @@ public final class Reward {
         double money = sec.getDouble("money", 0D);
         int exp = sec.getInt("xp-levels", 0);
 
+        ItemStack displayItem = null;
+        if (sec.isConfigurationSection("display-item")) {
+            displayItem = ItemUtil.itemFromSection(sec.getConfigurationSection("display-item"));
+        }
+
         List<ItemStack> items = new ArrayList<>();
         if (sec.isConfigurationSection("items")) {
             ConfigurationSection is = sec.getConfigurationSection("items");
@@ -100,12 +110,12 @@ public final class Reward {
         }
         List<String> cmds = sec.getStringList("commands");
 
-        return new Reward(id, display, weight, rarity, items, cmds, announce, message, money, exp);
+        return new Reward(id, display, weight, rarity, displayItem, items, cmds, announce, message, money, exp);
     }
 
     private static final class MessageFormatter {
-        static String winBroadcast(String player, String rewardId) {
-            return "<yellow>" + player + "</yellow> <gray>won</gray> <gold>" + rewardId + "</gold> <gray>from a crate!</gray>";
+        static String winBroadcast(String player, String rewardDisplay) {
+            return "<yellow>" + player + "</yellow> <gray>won</gray> <gold>" + rewardDisplay + "</gold> <gray>from a crate!</gray>";
         }
     }
 }

@@ -173,9 +173,23 @@ public final class SimpleCrateService implements CrateService {
     public CompletableFuture<Boolean> open(Player player, Crate crate) {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         Bukkit.getScheduler().runTask(plugin, () -> {
+            // Type-specific open permission (in addition to per-crate gate below)
+            if (crate.type() == Crate.Type.BLOCK) {
+                if (!player.hasPermission("minecrates.open.block")) {
+                    Messages.msg(player, MineCrates.get().configManager().msg("perm.open-deny"));
+                    future.complete(false); return;
+                }
+            } else { // VIRTUAL
+                if (!player.hasPermission("minecrates.open.virtual")) {
+                    Messages.msg(player, MineCrates.get().configManager().msg("perm.open-deny"));
+                    future.complete(false); return;
+                }
+            }
+
             long now = System.currentTimeMillis();
             long until = cooldowns.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(crate.id(), 0L);
-            if (until > now) {
+            boolean bypassCd = player.hasPermission("minecrates.bypass.cooldown");
+            if (!bypassCd && until > now) {
                 long remain = (until - now) / 1000L;
                 Messages.msg(player, "<red>Please wait <white>" + remain + "s</white> before opening again.</red>");
                 try {
@@ -229,9 +243,11 @@ public final class SimpleCrateService implements CrateService {
             Bukkit.getPluginManager().callEvent(openEvent);
             if (openEvent.isCancelled()) { future.complete(false); return; }
 
-            // set cooldown now
-            cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
-                    .put(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
+            // set cooldown now (unless bypass)
+            if (!bypassCd) {
+                cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
+                        .put(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
+            }
 
             Reward reward = crate.picker().pick();
             if (reward == null) { future.complete(false); return; }

@@ -37,7 +37,9 @@ public final class OpenAnimationGUI {
     private static List<ItemStack> buildIconPool(Crate crate) {
         List<ItemStack> pool = new ArrayList<>();
         for (Reward r : crate.rewards()) {
-            ItemStack icon = r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone();
+            ItemStack icon = r.displayItem() != null
+                    ? r.displayItem()
+                    : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
             String label = r.displayName();
             if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
                 label = ItemUtil.prettyMaterialName(icon.getType());
@@ -152,7 +154,9 @@ public final class OpenAnimationGUI {
     }
 
     private static void endWithReward(Inventory inv, Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
-        ItemStack icon = reward.items().isEmpty() ? new ItemStack(Material.CHEST) : reward.items().get(0).clone();
+        ItemStack icon = reward.displayItem() != null
+                ? reward.displayItem()
+                : (reward.items().isEmpty() ? new ItemStack(Material.CHEST) : reward.items().get(0).clone());
         String label = reward.displayName();
         if (label == null || label.isEmpty() || label.equalsIgnoreCase(reward.id())) label = ItemUtil.prettyMaterialName(icon.getType());
         ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");

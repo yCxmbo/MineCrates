@@ -1,9 +1,9 @@
 name: MineCrates
 main: me.ycxmbo.minecrates.MineCrates
-version: 1.0.0
+version: 1.1
 api-version: '1.20'
 author: ycxmbo
-website: https://example.invalid/minecrates
+website: https://www.discord.gg/geQxxdmX97
 softdepend: [Vault, PlaceholderAPI, DecentHolograms]
 
 commands:

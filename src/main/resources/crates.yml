@@ -41,6 +41,9 @@ crates:
         rarity: COMMON
         announce: false
         message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        display-item:
+          material: DIAMOND
+          amount: 1
         items:
           i1:
             material: DIAMOND
@@ -51,8 +54,20 @@ crates:
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         display: "Legendary Sword"
+        display-item:
+          material: NETHERITE_SWORD
+          amount: 1
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
         items:
           i1:
             material: NETHERITE_SWORD
+      broadcast_only:
+        weight: 10
+        rarity: RARE
+        display: "Shoutout"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "broadcast &d<player> &7got a &bShoutout&7!"

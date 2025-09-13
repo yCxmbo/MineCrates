@@ -6,7 +6,7 @@
 
     <groupId>me.ycxmbo</groupId>
     <artifactId>minecrates</artifactId>
-    <version>1.0.0</version>
+    <version>1.1</version>
     <name>MineCrates</name>
     <description>Modern crates plugin for Paper 1.20.x–1.21.x</description>
     <url>https://example.invalid/minecrates</url>
@@ -170,6 +170,8 @@
                         <phase>package</phase>
                         <goals><goal>shade</goal></goals>
                         <configuration>
+                            <!-- Replace main artifact (do not attach classifier). -->
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
                             <relocations>
                                 <relocation>
                                     <pattern>net.kyori.adventure.text.minimessage</pattern>
@@ -193,6 +195,29 @@
                                 </filter>
                             </filters>
                         </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- Remove backup original-*.jar so only one jar remains in target/ -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>clean-original-backup</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <target>
+                                <delete>
+                                    <fileset dir="${project.build.directory}" includes="original-*.jar"/>
+                                </delete>
+                            </target>
+                        </configuration>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
