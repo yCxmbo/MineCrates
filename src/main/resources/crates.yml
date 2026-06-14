@@ -35,6 +35,13 @@ crates:
       cascade:
         speed-ticks: 2
       close-delay-ticks: 20
+    pity:
+      enabled: true         # guarantee a top reward after a dry streak
+      threshold: 25         # opens without a pity-tier reward before it is forced
+      # Identify the guaranteed reward either by id...
+      reward: legendary_sword
+      # ...or by minimum rarity (used only when 'reward' is blank):
+      # rarity: LEGENDARY
     rewards:
       diamond_pack:
         weight: 35

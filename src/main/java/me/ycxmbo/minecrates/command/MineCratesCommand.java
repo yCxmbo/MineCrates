@@ -3,6 +3,7 @@ package me.ycxmbo.minecrates.command;
 import me.ycxmbo.minecrates.MineCrates;
 import me.ycxmbo.minecrates.crate.Crate;
 import me.ycxmbo.minecrates.crate.Reward;
+import me.ycxmbo.minecrates.data.PlayerData;
 import me.ycxmbo.minecrates.gui.CrateListGUI;
 import me.ycxmbo.minecrates.service.CrateService;
 import me.ycxmbo.minecrates.util.Messages;
@@ -44,6 +45,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
         Messages.msg(to, helpLineSuggest(label, "set ", cfg.msg("help.entries.set"), hasPerm(to, "minecrates.set")));
         Messages.msg(to, helpLineSuggest(label, "remove ", cfg.msg("help.entries.remove"), hasPerm(to, "minecrates.remove")));
         Messages.msg(to, helpLineSuggest(label, "testroll ", cfg.msg("help.entries.testroll"), hasPerm(to, "minecrates.testroll")));
+        Messages.msg(to, helpLineSuggest(label, "stats ", cfg.msg("help.entries.stats"), hasPerm(to, "minecrates.stats")));
         Messages.msg(to, helpLine(label, "reload", cfg.msg("help.entries.reload"), hasPerm(to, "minecrates.reload"), false));
         Messages.msg(to, helpLine(label, "editor", cfg.msg("help.entries.editor"), true, false));
     }
@@ -244,10 +246,62 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
                 counts.forEach((id,c) -> Messages.cmd(sender, " - <yellow>" + id + "</yellow>: <white>" + c + "</white>"));
             }
 
+            case "stats" -> {
+                if (!sender.hasPermission("minecrates.stats")) {
+                    Messages.cmd(sender, plugin.configManager().msg("perm.open-deny"));
+                    return true;
+                }
+                String name;
+                if (args.length >= 2) name = args[1];
+                else if (sender instanceof Player p) name = p.getName();
+                else { Messages.cmd(sender, "<red>Usage:</red> /" + label + " stats <player>"); return true; }
+
+                Player online = Bukkit.getPlayerExact(name);
+                UUID uuid;
+                String shownName;
+                if (online != null) {
+                    uuid = online.getUniqueId();
+                    shownName = online.getName();
+                } else {
+                    org.bukkit.OfflinePlayer off = Bukkit.getOfflinePlayerIfCached(name);
+                    if (off == null) { Messages.cmd(sender, "<red>Unknown player.</red>"); return true; }
+                    uuid = off.getUniqueId();
+                    shownName = off.getName() == null ? name : off.getName();
+                }
+                service.loadPlayerData(uuid).whenComplete((pd, ex) -> {
+                    if (ex != null || pd == null) { Messages.cmd(sender, "<red>Could not load stats.</red>"); return; }
+                    Bukkit.getScheduler().runTask(plugin, () -> renderStats(sender, shownName, pd));
+                });
+            }
+
             default -> sendConfigurableHelp(sender, label);
         }
 
         return true;
+    }
+
+    private void renderStats(CommandSender to, String playerName, PlayerData pd) {
+        Messages.cmd(to, "<gold>Stats for</gold> <white>" + playerName + "</white>");
+        Messages.cmd(to, " <gray>Opened:</gray> <white>" + pd.opened() + "</white>");
+        String last = pd.lastReward() == null || pd.lastReward().isEmpty() ? "<dark_gray>none</dark_gray>" : pd.lastReward();
+        Messages.cmd(to, " <gray>Last reward:</gray> <white>" + last + "</white>");
+
+        if (pd.virtualKeys().isEmpty()) {
+            Messages.cmd(to, " <gray>Virtual keys:</gray> <dark_gray>none</dark_gray>");
+        } else {
+            Messages.cmd(to, " <gray>Virtual keys:</gray>");
+            pd.virtualKeys().forEach((keyId, amt) ->
+                    Messages.cmd(to, "  <gray>-</gray> <yellow>" + service.keyDisplay(keyId) + "</yellow><gray>:</gray> <white>" + amt + "</white>"));
+        }
+
+        boolean anyPity = false;
+        for (Crate crate : service.crates()) {
+            if (!crate.pityEnabled()) continue;
+            if (!anyPity) { Messages.cmd(to, " <gray>Pity progress:</gray>"); anyPity = true; }
+            int remaining = Math.max(0, crate.pityThreshold() - pd.pityCounter(crate.id()));
+            Messages.cmd(to, "  <gray>-</gray> <white>" + crate.id() + "</white><gray>:</gray> <yellow>"
+                    + remaining + "</yellow> <gray>opens until guaranteed</gray>");
+        }
     }
 
     private void sendHelp(CommandSender to, String label) {
@@ -271,11 +325,14 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> out = new ArrayList<>();
         if (args.length == 1) {
-            out.addAll(List.of("help","list","preview","open","givekey","giveall","set","remove","reload","testroll","editor"));
+            out.addAll(List.of("help","list","preview","open","givekey","giveall","set","remove","reload","testroll","stats","editor"));
         } else {
             switch (args[0].toLowerCase(Locale.ROOT)) {
                 case "preview","open","set","testroll" -> {
                     if (args.length == 2) out.addAll(service.crates().stream().map(Crate::id).toList());
+                }
+                case "stats" -> {
+                    if (args.length == 2) out.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());
                 }
                 case "givekey" -> {
                     if (args.length == 2) out.addAll(Bukkit.getOnlinePlayers().stream().map(Player::getName).toList());

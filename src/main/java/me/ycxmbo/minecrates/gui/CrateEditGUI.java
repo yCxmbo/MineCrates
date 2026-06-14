@@ -137,7 +137,7 @@ public final class CrateEditGUI implements InventoryHolder {
                     gui.rebuildTop();
                 }
             } catch (Throwable t) {
-                t.printStackTrace();
+                MineCrates.get().getLogger().log(java.util.logging.Level.WARNING, "Error handling crate rename input", t);
             }
         });
         return true;
@@ -471,7 +471,9 @@ public final class CrateEditGUI implements InventoryHolder {
                 keyDisplayOverrideEnabled = !keyDisplayOverrideEnabled;
                 if (!keyDisplayOverrideEnabled) keyDisplayOverride = null;
             } else if (e.isLeftClick()) {
-                keyDisplayOverride = "<yellow>" + MineCrates.get().crates().crate(crateId).displayName() + "</yellow> Key";
+                me.ycxmbo.minecrates.crate.Crate c = MineCrates.get().crates().crate(crateId);
+                String base = c != null ? c.displayName() : crateId;
+                keyDisplayOverride = "<yellow>" + base + "</yellow> Key";
                 keyDisplayOverrideEnabled = true;
             } else if (e.isRightClick()) {
                 keyDisplayOverride = null; keyDisplayOverrideEnabled = false;
@@ -641,7 +643,7 @@ public final class CrateEditGUI implements InventoryHolder {
             Messages.msg(p, "<green>Crate saved.</green>");
         } catch (Exception ex) {
             Messages.msg(p, "<red>Save failed:</red> " + ex.getMessage());
-            ex.printStackTrace();
+            MineCrates.get().getLogger().log(java.util.logging.Level.WARNING, "Failed to save crate from editor", ex);
         }
     }
 

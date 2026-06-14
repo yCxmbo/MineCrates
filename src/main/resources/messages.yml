@@ -49,6 +49,7 @@ help:
     set: "Bind targeted block to crate"
     remove: "Unbind targeted block"
     testroll: "Simulate n rolls"
+    stats: "View a player's crate stats"
     reload: "Reload configs"
     editor: "Open crate editor"
 

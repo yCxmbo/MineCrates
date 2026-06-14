@@ -33,6 +33,7 @@ public final class ItemUtil {
     public static void applyName(ItemStack it, String name) {
         if (it == null || name == null || name.isEmpty()) return;
         ItemMeta meta = it.getItemMeta();
+        if (meta == null) return;
         var comp = (name.indexOf('&') >= 0 || name.indexOf('§') >= 0)
                 ? LEGACY_AMP.deserialize(name)
                 : MM.deserialize(name);
@@ -43,6 +44,7 @@ public final class ItemUtil {
     public static void applyLore(ItemStack it, List<String> lore) {
         if (it == null || lore == null || lore.isEmpty()) return;
         ItemMeta meta = it.getItemMeta();
+        if (meta == null) return;
         List<net.kyori.adventure.text.Component> lines = new ArrayList<>();
         for (String s : lore) {
             var comp = (s != null && (s.indexOf('&') >= 0 || s.indexOf('§') >= 0))
@@ -75,6 +77,7 @@ public final class ItemUtil {
     public static void tagKey(ItemStack it, String keyId) {
         if (it == null || KEY_TAG == null) return;
         ItemMeta meta = it.getItemMeta();
+        if (meta == null) return;
         meta.getPersistentDataContainer().set(KEY_TAG, PersistentDataType.STRING, keyId);
         meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
         it.setItemMeta(meta);

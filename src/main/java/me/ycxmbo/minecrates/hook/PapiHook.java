@@ -52,6 +52,13 @@ public final class PapiHook {
                 return String.valueOf(service.cooldownRemaining(p.getUniqueId(), crateId));
             }
 
+            // %minecrates_pity_{crate}% -> opens remaining until guaranteed reward ("" if disabled)
+            if (params.startsWith("pity_")) {
+                String crateId = params.substring("pity_".length());
+                long remaining = service.pityRemaining(p.getUniqueId(), crateId);
+                return remaining < 0 ? "" : String.valueOf(remaining);
+            }
+
             // %minecrates_crate_name_{id}%
             if (params.startsWith("crate_name_")) {
                 String crateId = params.substring("crate_name_".length());

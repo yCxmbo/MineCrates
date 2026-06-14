@@ -14,9 +14,13 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class MineCrates extends JavaPlugin {
+
+    /** bStats plugin id from https://bstats.org. Set to a value &gt; 0 to enable metrics. */
+    private static final int BSTATS_PLUGIN_ID = 0;
 
     private static MineCrates INSTANCE;
     private CrateService crateService;
@@ -57,12 +61,13 @@ public final class MineCrates extends JavaPlugin {
         crateService.reloadAllAsync().thenRun(() ->
                 log.info("[MineCrates] Crates & keys loaded.")
         ).exceptionally(ex -> {
-            log.severe("[MineCrates] Failed to load data: " + ex.getMessage());
-            ex.printStackTrace();
+            log.log(Level.SEVERE, "[MineCrates] Failed to load data", ex);
             return null;
         });
 
         getServer().getPluginManager().registerEvents(new BlockBindingListener(crateService), this);
+        getServer().getPluginManager().registerEvents(
+                new me.ycxmbo.minecrates.listener.PlayerSessionListener(crateService), this);
         // Preview GUI
         new PreviewGUI(this, crateService, configManager);
         getServer().getPluginManager().registerEvents(new me.ycxmbo.minecrates.gui.EditorListener(), this);
@@ -80,7 +85,24 @@ public final class MineCrates extends JavaPlugin {
             log.severe("[MineCrates] Command 'minecrates' missing from plugin.yml!");
         }
 
-        // (Listeners come in the next drop along with implementations)
+        // Periodic autosave of cached player data
+        int autosaveSeconds = getConfig().getInt("data.autosave-seconds", 300);
+        if (autosaveSeconds > 0) {
+            long ticks = autosaveSeconds * 20L;
+            Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> crateService.persistAll(), ticks, ticks);
+        }
+
+        // bStats metrics (opt-out via config; only active once a real plugin id is set)
+        if (getConfig().getBoolean("data.metrics", true) && BSTATS_PLUGIN_ID > 0) {
+            try {
+                org.bstats.bukkit.Metrics metrics = new org.bstats.bukkit.Metrics(this, BSTATS_PLUGIN_ID);
+                metrics.addCustomChart(new org.bstats.charts.SingleLineChart(
+                        "crates_loaded", () -> crateService.crates().size()));
+            } catch (Throwable t) {
+                log.log(Level.FINE, "bStats metrics could not be initialised", t);
+            }
+        }
+
         log.info("[MineCrates] Enabled.");
     }
 

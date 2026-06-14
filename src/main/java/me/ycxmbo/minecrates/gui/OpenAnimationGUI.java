@@ -6,7 +6,6 @@ import me.ycxmbo.minecrates.crate.Reward;
 import me.ycxmbo.minecrates.util.ItemUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -26,6 +25,7 @@ public final class OpenAnimationGUI {
     private OpenAnimationGUI() {}
 
     public static void play(Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
+        me.ycxmbo.minecrates.util.SoundUtil.play(player, "open");
         switch (crate.animationType()) {
             case REVEAL -> playReveal(player, crate, reward, finish);
             case CASCADE -> playCascade(player, crate, reward, finish);
@@ -101,7 +101,7 @@ public final class OpenAnimationGUI {
             @Override public void run() {
                 step++;
                 for (int slot = 11; slot <= 15; slot++) inv.setItem(slot, pool.get(rng.nextInt(pool.size())));
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.5f, 1.6f);
+                me.ycxmbo.minecrates.util.SoundUtil.play(player, "reveal-tick");
                 if (step >= cycles) { endWithReward(inv, player, crate, reward, finish); cancel(); }
             }
         }.runTaskTimer(MineCrates.get(), 1L, speed);
@@ -123,7 +123,7 @@ public final class OpenAnimationGUI {
             @Override public void run() {
                 step++;
                 inv.setItem(13, pool.get(rng.nextInt(pool.size())));
-                player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.7f, 1.2f);
+                me.ycxmbo.minecrates.util.SoundUtil.play(player, "reveal-tick");
                 if (step >= flickers) { endWithReward(inv, player, crate, reward, finish); cancel(); }
             }
         }.runTaskTimer(MineCrates.get(), 1L, speed);
@@ -147,7 +147,7 @@ public final class OpenAnimationGUI {
                     if (slot == 4 || slot == 22) { slot++; return; }
                     inv.setItem(slot, pool.get(rng.nextInt(pool.size())));
                     slot++;
-                    player.playSound(player.getLocation(), Sound.UI_BUTTON_CLICK, 0.4f, 1.4f);
+                    me.ycxmbo.minecrates.util.SoundUtil.play(player, "reveal-tick");
                 } else { endWithReward(inv, player, crate, reward, finish); cancel(); }
             }
         }.runTaskTimer(MineCrates.get(), 1L, speed);
@@ -161,7 +161,8 @@ public final class OpenAnimationGUI {
         if (label == null || label.isEmpty() || label.equalsIgnoreCase(reward.id())) label = ItemUtil.prettyMaterialName(icon.getType());
         ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");
         inv.setItem(13, icon);
-        player.playSound(player.getLocation(), Sound.ENTITY_PLAYER_LEVELUP, 1f, 1f);
+        String rewardSoundKey = "reward-" + reward.rarity().name().toLowerCase(java.util.Locale.ROOT);
+        me.ycxmbo.minecrates.util.SoundUtil.play(player, rewardSoundKey);
         Bukkit.getScheduler().runTaskLater(MineCrates.get(), () -> {
             player.closeInventory();
             finish.accept(reward);
