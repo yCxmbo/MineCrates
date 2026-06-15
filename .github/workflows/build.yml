@@ -4,6 +4,7 @@ on:
   push:
     branches: [ "**" ]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build:
@@ -24,4 +25,22 @@ jobs:
           cache: maven
 
       - name: Build and test
-        run: mvn -B -P ${{ matrix.profile }} verify
+        # Retry to ride out transient dependency-repo flakiness (e.g. jitpack 403
+        # rate-limiting on runner IPs). Once a run succeeds, cached ~/.m2 avoids
+        # re-hitting remote repos on later runs.
+        run: |
+          for attempt in 1 2 3; do
+            echo "::group::Maven attempt $attempt"
+            if mvn -B -P ${{ matrix.profile }} \
+                -Dmaven.wagon.http.retryHandler.count=3 \
+                -Dmaven.wagon.http.retryHandler.requestSentEnabled=true \
+                verify; then
+              echo "::endgroup::"
+              exit 0
+            fi
+            echo "::endgroup::"
+            echo "Attempt $attempt failed; backing off before retry..."
+            sleep $((attempt * 15))
+          done
+          echo "All Maven attempts failed."
+          exit 1
