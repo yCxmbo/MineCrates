@@ -2,6 +2,7 @@ package me.ycxmbo.minecrates.service;
 
 import me.ycxmbo.minecrates.crate.Crate;
 import me.ycxmbo.minecrates.crate.Reward;
+import me.ycxmbo.minecrates.data.PlayerData;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -50,6 +51,18 @@ public interface CrateService {
     long cooldownRemaining(UUID playerId, String crateId);
     long totalOpened(UUID playerId);
     String lastRewardId(UUID playerId);
+    /** Opens remaining before the crate's pity guarantee triggers, or -1 if pity is disabled. */
+    long pityRemaining(UUID playerId, String crateId);
+
+    // Player data lifecycle
+    /** Warms the in-memory cache for a joining player (async load). */
+    void onJoin(UUID playerId);
+    /** Persists and evicts a quitting player's data. */
+    void onQuit(UUID playerId);
+    /** Returns cached data for an online player, or loads it asynchronously for an offline one. */
+    CompletableFuture<PlayerData> loadPlayerData(UUID playerId);
+    /** Asynchronously persists every cached player record (used by the autosave task). */
+    CompletableFuture<Void> persistAll();
 
     // Shutdown
     void shutdown();

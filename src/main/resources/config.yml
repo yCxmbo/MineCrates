@@ -50,3 +50,22 @@ rewards:
 # Holograms behavior (when DecentHolograms is present)
 holograms:
   refresh-seconds: 15
+
+# Player data persistence & anonymous metrics
+data:
+  # How often (seconds) cached player data (virtual keys, cooldowns, opens, pity) is
+  # flushed to disk. Data is also saved on quit and on server shutdown. 0 disables autosave.
+  autosave-seconds: 300
+  # Send anonymous usage statistics to bStats. Only active once a real bStats plugin id
+  # is configured in the plugin source (see MineCrates.BSTATS_PLUGIN_ID).
+  metrics: true
+
+# Configurable sounds. Format: "SOUND_NAME:volume:pitch". Leave blank to disable an entry.
+# Sound names are Bukkit Sound enum values (https://hub.spigotmc.org -> org.bukkit.Sound).
+sounds:
+  open: "BLOCK_CHEST_OPEN:0.7:1.0"          # played when an opening animation starts
+  reveal-tick: "UI_BUTTON_CLICK:0.5:1.6"     # played on each animation step
+  reward-common: "ENTITY_ITEM_PICKUP:1.0:1.0"
+  reward-rare: "ENTITY_EXPERIENCE_ORB_PICKUP:1.0:1.2"
+  reward-epic: "ENTITY_PLAYER_LEVELUP:1.0:1.0"
+  reward-legendary: "UI_TOAST_CHALLENGE_COMPLETE:1.0:1.0"

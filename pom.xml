@@ -56,6 +56,14 @@
             <version>${adventure.minimessage.version}</version>
         </dependency>
 
+        <!-- bStats metrics (shaded & relocated) -->
+        <dependency>
+            <groupId>org.bstats</groupId>
+            <artifactId>bstats-bukkit</artifactId>
+            <version>3.0.2</version>
+            <scope>compile</scope>
+        </dependency>
+
         <!-- Vault API (soft-depend / compileOnly) -->
         <dependency>
             <groupId>com.github.MilkBowl</groupId>
@@ -176,6 +184,10 @@
                                 <relocation>
                                     <pattern>net.kyori.adventure.text.minimessage</pattern>
                                     <shadedPattern>me.ycxmbo.minecrates.libs.minimessage</shadedPattern>
+                                </relocation>
+                                <relocation>
+                                    <pattern>org.bstats</pattern>
+                                    <shadedPattern>me.ycxmbo.minecrates.libs.bstats</shadedPattern>
                                 </relocation>
                             </relocations>
                             <minimizeJar>true</minimizeJar>

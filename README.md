@@ -19,8 +19,12 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
   - Live hologram refresh button
 - Preview GUI with rarity filters and configurable navigation slots
 - Open animation with configurable markers
+- Configurable sounds per event/rarity (`sounds:` in `config.yml`)
+- Pity / milestone system: guarantee a reward after a dry streak (per‑crate `pity:`)
+- Persistent player data (virtual keys, cooldowns, opens, last reward, pity) that survives restarts
 - Permissions for type‑specific open and cooldown bypass
 - PlaceholderAPI expansion
+- Optional anonymous bStats metrics
 
 ## Commands
 
@@ -36,6 +40,7 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
 - `/minecrates remove` – unbind targeted block
 - `/minecrates binds [crate]` – list bindings (optionally filtered by crate)
 - `/minecrates testroll <crate> <n>` – sample reward distribution
+- `/minecrates stats [player]` – show a player's opens, virtual keys, last reward and pity progress
 - `/minecrates reload` – reload configs and data
 
 ## Permissions
@@ -45,7 +50,7 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
 - `minecrates.open` – allow opening per‑crate via `minecrates.open.<id>` gate
 - `minecrates.open.block` – allow opening BLOCK crates
 - `minecrates.open.virtual` – allow opening VIRTUAL crates
-- `minecrates.givekey`, `minecrates.giveall`, `minecrates.set`, `minecrates.remove`, `minecrates.reload`, `minecrates.testroll` – admin actions
+- `minecrates.givekey`, `minecrates.giveall`, `minecrates.set`, `minecrates.remove`, `minecrates.reload`, `minecrates.testroll`, `minecrates.stats` – admin actions
 - `minecrates.bypass.cooldown` – bypass crate cooldowns
 - `minecrates.bypass.cost` – bypass opening costs
 - `minecrates.bypass.breakbound` – break bound blocks without unbinding
@@ -57,6 +62,7 @@ When PlaceholderAPI is present the following placeholders are available:
 - `%minecrates_keys_{key}%` – virtual key balance for the specified key ID
 - `%minecrates_opened%` – total number of crates the player has opened
 - `%minecrates_cooldown_{crate}%` – seconds remaining on that crate’s cooldown
+- `%minecrates_pity_{crate}%` – opens remaining until the crate’s guaranteed reward (blank if pity disabled)
 - `%minecrates_last_reward%` – ID of the last reward the player received
 - `%minecrates_crate_name_{id}%` – display name of the crate with the given ID
 - `%minecrates_crate_display_{id}%` – alias of `crate_name`

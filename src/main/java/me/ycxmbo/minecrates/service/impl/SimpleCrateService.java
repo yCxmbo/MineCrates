@@ -5,6 +5,9 @@ import me.ycxmbo.minecrates.crate.Crate;
 import me.ycxmbo.minecrates.crate.Key;
 import me.ycxmbo.minecrates.crate.Reward;
 import me.ycxmbo.minecrates.crate.RewardPicker;
+import me.ycxmbo.minecrates.data.PlayerData;
+import me.ycxmbo.minecrates.data.PlayerDataStore;
+import me.ycxmbo.minecrates.data.YamlPlayerDataStore;
 import me.ycxmbo.minecrates.hook.HologramManager;
 import me.ycxmbo.minecrates.gui.OpenAnimationGUI;
 import me.ycxmbo.minecrates.event.CrateOpenEvent;
@@ -27,6 +30,8 @@ import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.logging.Level;
 
 public final class SimpleCrateService implements CrateService {
 
@@ -39,10 +44,9 @@ public final class SimpleCrateService implements CrateService {
     private volatile Map<String, Key> keys = new ConcurrentHashMap<>();
     private volatile Map<Location, String> bindings = new ConcurrentHashMap<>();
 
-    private final Map<UUID, Map<String, Integer>> virtKeys = new ConcurrentHashMap<>();
-    private final Map<UUID, Map<String, Long>> cooldowns = new ConcurrentHashMap<>();
-    private final Map<UUID, Long> opened = new ConcurrentHashMap<>();
-    private final Map<UUID, String> lastReward = new ConcurrentHashMap<>();
+    // Persistent player data (cache + backing store)
+    private final PlayerDataStore store;
+    private final Map<UUID, PlayerData> players = new ConcurrentHashMap<>();
 
     private final MiniMessage mm = MiniMessage.miniMessage();
 
@@ -50,6 +54,12 @@ public final class SimpleCrateService implements CrateService {
         this.plugin = plugin;
         this.vault = vault;
         this.holograms = holograms;
+        this.store = new YamlPlayerDataStore(new File(plugin.getDataFolder(), "playerdata"), plugin.getLogger());
+    }
+
+    /** Returns the cached record for the player, loading synchronously if it is not warmed yet. */
+    private PlayerData data(UUID id) {
+        return players.computeIfAbsent(id, store::load);
     }
 
     @Override
@@ -131,7 +141,15 @@ public final class SimpleCrateService implements CrateService {
             for (String key : ws.getKeys(false)) {
                 String[] xyz = key.split(",");
                 if (xyz.length != 3) continue;
-                int x = Integer.parseInt(xyz[0]); int yv = Integer.parseInt(xyz[1]); int z = Integer.parseInt(xyz[2]);
+                int x, yv, z;
+                try {
+                    x = Integer.parseInt(xyz[0].trim());
+                    yv = Integer.parseInt(xyz[1].trim());
+                    z = Integer.parseInt(xyz[2].trim());
+                } catch (NumberFormatException ex) {
+                    plugin.getLogger().warning("Skipping malformed binding coordinate '" + key + "' in world '" + world + "'.");
+                    continue;
+                }
                 String id = ws.getString(key);
                 org.bukkit.World w = Bukkit.getWorld(world);
                 if (w != null && id != null) {
@@ -186,8 +204,9 @@ public final class SimpleCrateService implements CrateService {
                 }
             }
 
+            PlayerData pd = data(player.getUniqueId());
             long now = System.currentTimeMillis();
-            long until = cooldowns.getOrDefault(player.getUniqueId(), Map.of()).getOrDefault(crate.id(), 0L);
+            long until = pd.cooldownUntil(crate.id());
             boolean bypassCd = player.hasPermission("minecrates.bypass.cooldown");
             if (!bypassCd && until > now) {
                 long remain = (until - now) / 1000L;
@@ -220,13 +239,20 @@ public final class SimpleCrateService implements CrateService {
 
             // Key checks
             if (crate.requiresKey()) {
+                Key requiredKey = crate.key() == null ? null : keys.get(crate.key().id());
+                if (requiredKey == null) {
+                    plugin.getLogger().warning("Crate '" + crate.id() + "' requires key '"
+                            + (crate.key() == null ? "?" : crate.key().id()) + "' which is not defined in keys.yml.");
+                    Messages.msg(player, "<red>This crate is misconfigured (missing key).</red>");
+                    future.complete(false); return;
+                }
                 boolean has = false;
-                if (virtualKeys(player.getUniqueId(), crate.key().id()) > 0) { giveVirtualKeys(player.getUniqueId(), crate.key().id(), -1); has = true; }
+                if (virtualKeys(player.getUniqueId(), requiredKey.id()) > 0) { giveVirtualKeys(player.getUniqueId(), requiredKey.id(), -1); has = true; }
                 else {
                     int need = 1;
                     for (ItemStack it : player.getInventory().getContents()) {
                         if (it == null || it.getType().isAir()) continue;
-                        if (keys.get(crate.key().id()).matches(it)) {
+                        if (requiredKey.matches(it)) {
                             int take = Math.min(need, it.getAmount());
                             it.setAmount(it.getAmount() - take);
                             need -= take;
@@ -245,12 +271,12 @@ public final class SimpleCrateService implements CrateService {
 
             // set cooldown now (unless bypass)
             if (!bypassCd) {
-                cooldowns.computeIfAbsent(player.getUniqueId(), k -> new ConcurrentHashMap<>())
-                        .put(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
+                pd.setCooldownUntil(crate.id(), System.currentTimeMillis() + crate.cooldownMillis());
             }
 
-            Reward reward = crate.picker().pick();
-            if (reward == null) { future.complete(false); return; }
+            Reward picked = crate.picker().pick();
+            if (picked == null) { future.complete(false); return; }
+            final Reward reward = applyPity(pd, crate, picked);
 
             OpenAnimationGUI.play(player, crate, reward, r -> {
                 CrateRewardGiveEvent giveEvent = new CrateRewardGiveEvent(player, crate, r);
@@ -259,12 +285,59 @@ public final class SimpleCrateService implements CrateService {
                     r.give(player, vault);
                     logRollAsync(player.getUniqueId(), player.getName(), crate.id(), r.id());
                 }
-                lastReward.put(player.getUniqueId(), r.id());
-                opened.merge(player.getUniqueId(), 1L, Long::sum);
+                pd.setLastReward(r.id());
+                pd.incrementOpened();
                 future.complete(true);
             });
         });
         return future;
+    }
+
+    /**
+     * Applies the crate's pity rule. Increments the player's pity counter; if the natural
+     * roll already satisfies the pity tier the counter resets, and once the counter reaches
+     * the threshold the guaranteed reward is substituted and the counter resets.
+     */
+    private Reward applyPity(PlayerData pd, Crate crate, Reward natural) {
+        if (!crate.pityEnabled()) return natural;
+        String crateId = crate.id();
+        if (satisfiesPity(crate, natural)) {
+            pd.setPityCounter(crateId, 0);
+            return natural;
+        }
+        int count = pd.pityCounter(crateId) + 1;
+        if (count >= crate.pityThreshold()) {
+            Reward forced = pickPityReward(crate);
+            pd.setPityCounter(crateId, 0);
+            return forced != null ? forced : natural;
+        }
+        pd.setPityCounter(crateId, count);
+        return natural;
+    }
+
+    private boolean satisfiesPity(Crate crate, Reward reward) {
+        Crate.Pity pity = crate.pity();
+        if (pity.rewardId() != null) return reward.id().equalsIgnoreCase(pity.rewardId());
+        if (pity.rarity() != null) return reward.rarity().ordinal() >= pity.rarity().ordinal();
+        return false;
+    }
+
+    private Reward pickPityReward(Crate crate) {
+        Crate.Pity pity = crate.pity();
+        if (pity.rewardId() != null) {
+            for (Reward r : crate.rewards()) {
+                if (r.id().equalsIgnoreCase(pity.rewardId())) return r;
+            }
+            return null;
+        }
+        if (pity.rarity() != null) {
+            List<Reward> eligible = new ArrayList<>();
+            for (Reward r : crate.rewards()) {
+                if (r.rarity().ordinal() >= pity.rarity().ordinal()) eligible.add(r);
+            }
+            if (!eligible.isEmpty()) return eligible.get(ThreadLocalRandom.current().nextInt(eligible.size()));
+        }
+        return null;
     }
 
     private void logRollAsync(UUID uuid, String name, String crateId, String rewardId) {
@@ -308,15 +381,12 @@ public final class SimpleCrateService implements CrateService {
 
     @Override
     public void giveVirtualKeys(UUID playerId, String keyId, int amount) {
-        String id = keyId.toLowerCase(Locale.ROOT);
-        virtKeys.computeIfAbsent(playerId, u -> new ConcurrentHashMap<>())
-                .merge(id, amount, Integer::sum);
-        if (virtKeys.get(playerId).get(id) <= 0) virtKeys.get(playerId).remove(id);
+        data(playerId).addVirtualKeys(keyId.toLowerCase(Locale.ROOT), amount);
     }
 
     @Override
     public int virtualKeys(UUID playerId, String keyId) {
-        return virtKeys.getOrDefault(playerId, Collections.emptyMap()).getOrDefault(keyId.toLowerCase(Locale.ROOT), 0);
+        return data(playerId).virtualKeys(keyId.toLowerCase(Locale.ROOT));
     }
 
     @Override
@@ -345,19 +415,56 @@ public final class SimpleCrateService implements CrateService {
 
     @Override
     public long cooldownRemaining(UUID playerId, String crateId) {
-        Map<String, Long> m = cooldowns.get(playerId);
-        if (m == null) return 0;
-        Long until = m.get(crateId.toLowerCase(Locale.ROOT));
-        if (until == null) return 0;
+        long until = data(playerId).cooldownUntil(crateId.toLowerCase(Locale.ROOT));
+        if (until <= 0) return 0;
         long rem = (until - System.currentTimeMillis()) / 1000L;
         return Math.max(0, rem);
     }
 
-    @Override public long totalOpened(UUID playerId) { return opened.getOrDefault(playerId, 0L); }
-    @Override public String lastRewardId(UUID playerId) { return lastReward.getOrDefault(playerId, ""); }
+    @Override public long totalOpened(UUID playerId) { return data(playerId).opened(); }
+    @Override public String lastRewardId(UUID playerId) { return data(playerId).lastReward(); }
+
+    @Override
+    public long pityRemaining(UUID playerId, String crateId) {
+        Crate crate = crate(crateId);
+        if (crate == null || !crate.pityEnabled()) return -1;
+        int remaining = crate.pityThreshold() - data(playerId).pityCounter(crate.id());
+        return Math.max(0, remaining);
+    }
+
+    // ───── Player data lifecycle ─────
+
+    @Override
+    public void onJoin(UUID playerId) {
+        store.loadAsync(playerId).thenAccept(pd -> players.putIfAbsent(playerId, pd));
+    }
+
+    @Override
+    public void onQuit(UUID playerId) {
+        PlayerData pd = players.remove(playerId);
+        if (pd != null) store.saveAsync(pd);
+    }
+
+    @Override
+    public CompletableFuture<PlayerData> loadPlayerData(UUID playerId) {
+        PlayerData cached = players.get(playerId);
+        if (cached != null) return CompletableFuture.completedFuture(cached);
+        return store.loadAsync(playerId);
+    }
+
+    @Override
+    public CompletableFuture<Void> persistAll() {
+        return store.saveAll(new ArrayList<>(players.values()));
+    }
 
     @Override
     public void shutdown() {
-        // nothing long-running yet
+        try {
+            for (PlayerData pd : players.values()) store.save(pd);
+        } catch (Exception ex) {
+            plugin.getLogger().log(Level.WARNING, "Error while saving player data on shutdown", ex);
+        } finally {
+            store.close();
+        }
     }
 }

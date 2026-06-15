@@ -58,6 +58,10 @@ permissions:
     description: Run a test distribution for a crate
     default: op
 
+  minecrates.stats:
+    description: View a player's crate stats
+    default: op
+
   minecrates.bypass.cooldown:
     description: Bypass crate cooldowns
     default: op

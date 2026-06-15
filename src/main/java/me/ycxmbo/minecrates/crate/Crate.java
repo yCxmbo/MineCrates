@@ -15,6 +15,15 @@ public final class Crate {
     public enum CostCurrency { VAULT, EXP, EXP_LEVELS }
     public enum AnimationType { ROULETTE, REVEAL, CASCADE }
 
+    /**
+     * Pity / milestone configuration. When enabled, a guaranteed reward is granted
+     * after {@code threshold} opens without one. The guaranteed reward is identified
+     * either by {@code rewardId} or, when that is blank, by minimum {@code rarity}.
+     */
+    public record Pity(boolean enabled, int threshold, String rewardId, Reward.Rarity rarity) {
+        public static final Pity DISABLED = new Pity(false, 0, null, null);
+    }
+
     private final String id;
     private final String display;
     private final Type type;
@@ -61,6 +70,9 @@ public final class Crate {
     private final int cascadeSpeedTicks;
     private final long closeDelayTicks;
 
+    // Pity / milestone
+    private final Pity pity;
+
     public Crate(String id, String display, Type type, boolean requiresKey, long cooldownMillis,
                  Key key, String keyDisplayOverride, List<Reward> rewards,
                  boolean holoEnabled, double holoYOffset, List<String> holoLines,
@@ -68,7 +80,8 @@ public final class Crate {
                  boolean particlesEnabled, ParticleShape particleShape, String particleType,
                  double particleRadius, double particleYOffset, int particlePoints,
                  AnimationType animationType, int rouletteCycles, int rouletteSpeedTicks,
-                 int revealFlickers, int revealSpeedTicks, int cascadeSpeedTicks, long closeDelayTicks) {
+                 int revealFlickers, int revealSpeedTicks, int cascadeSpeedTicks, long closeDelayTicks,
+                 Pity pity) {
 
         this.id = id.toLowerCase(Locale.ROOT);
         this.display = display;
@@ -103,6 +116,8 @@ public final class Crate {
         this.revealSpeedTicks = Math.max(1, revealSpeedTicks);
         this.cascadeSpeedTicks = Math.max(1, cascadeSpeedTicks);
         this.closeDelayTicks = Math.max(0L, closeDelayTicks);
+
+        this.pity = pity == null ? Pity.DISABLED : pity;
     }
 
     public String id() { return id; }
@@ -139,6 +154,11 @@ public final class Crate {
     public int revealSpeedTicks() { return revealSpeedTicks; }
     public int cascadeSpeedTicks() { return cascadeSpeedTicks; }
     public long closeDelayTicks() { return closeDelayTicks; }
+
+    // Pity getters
+    public Pity pity() { return pity; }
+    public boolean pityEnabled() { return pity.enabled() && pity.threshold() > 0; }
+    public int pityThreshold() { return pity.threshold(); }
 
     public static Crate fromSection(String id, ConfigurationSection sec, Map<String, Key> keys) {
         String display = sec.getString("display", id);
@@ -239,9 +259,25 @@ public final class Crate {
             aCloseDelay = as.getLong("close-delay-ticks", defCloseDelay);
         }
 
+        // pity / milestone (optional)
+        Pity pity = Pity.DISABLED;
+        if (sec.isConfigurationSection("pity")) {
+            ConfigurationSection ps2 = sec.getConfigurationSection("pity");
+            boolean enabled = ps2.getBoolean("enabled", false);
+            int threshold = ps2.getInt("threshold", 0);
+            String rewardId = ps2.getString("reward", null);
+            Reward.Rarity rarity = null;
+            String rarityRaw = ps2.getString("rarity", null);
+            if (rarityRaw != null && !rarityRaw.isBlank()) {
+                try { rarity = Reward.Rarity.valueOf(rarityRaw.toUpperCase(Locale.ROOT)); } catch (Exception ignored) {}
+            }
+            pity = new Pity(enabled, threshold, (rewardId == null || rewardId.isBlank()) ? null : rewardId, rarity);
+        }
+
         return new Crate(id, display, type, reqKey, cooldownMs, key, keyDisplayOverride, rewards,
                 ho, yoff, lines, costEnabled, currency, amount,
                 pEnabled, pShape, pType, pRadius, pYOffset, pPoints,
-                aType, aRouletteCycles, aRouletteSpeed, aRevealFlickers, aRevealSpeed, aCascadeSpeed, aCloseDelay);
+                aType, aRouletteCycles, aRouletteSpeed, aRevealFlickers, aRevealSpeed, aCascadeSpeed, aCloseDelay,
+                pity);
     }
 }
