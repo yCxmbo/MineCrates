@@ -24,17 +24,16 @@ import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
 /**
- * PreviewGUI displays rewards of a crate with pagination and rarity filters.
+ * PreviewGUI displays rewards of a crate with pagination.
  * - Uses a dedicated InventoryHolder to reliably identify the menu (no title matching).
  * - All text is MiniMessage from messages.yml via ConfigManager.
- * - Clicks are cancelled; only navigation/filter/close are actionable.
+ * - Clicks are cancelled; only navigation/close are actionable.
  */
 public final class PreviewGUI implements Listener {
 
@@ -49,14 +48,6 @@ public final class PreviewGUI implements Listener {
     private static final int SIZE = ROWS * 9;
     private static final int CONTENT_SLOTS = 45; // 0..44
 
-    private static final Map<Reward.Rarity, Material> RARITY_ICONS = new EnumMap<>(Reward.Rarity.class);
-    static {
-        RARITY_ICONS.put(Reward.Rarity.COMMON, Material.LIME_STAINED_GLASS_PANE);
-        RARITY_ICONS.put(Reward.Rarity.RARE, Material.LIGHT_BLUE_STAINED_GLASS_PANE);
-        RARITY_ICONS.put(Reward.Rarity.EPIC, Material.PURPLE_STAINED_GLASS_PANE);
-        RARITY_ICONS.put(Reward.Rarity.LEGENDARY, Material.ORANGE_STAINED_GLASS_PANE);
-    }
-
     public PreviewGUI(MineCrates plugin, CrateService service, ConfigManager config) {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.service = Objects.requireNonNull(service, "service");
@@ -67,13 +58,13 @@ public final class PreviewGUI implements Listener {
     }
 
     public void open(Player player, Crate crate) {
-        open(player, crate, 1, null);
+        open(player, crate, 1);
     }
 
-    public void open(Player player, Crate crate, int page, Reward.Rarity filter) {
+    public void open(Player player, Crate crate, int page) {
         if (player == null || crate == null) return;
 
-        int totalRewards = (filter == null ? crate.rewards().size() : (int) crate.rewards().stream().filter(r -> r.rarity() == filter).count());
+        int totalRewards = crate.rewards().size();
         int perPage = Math.max(1, plugin.getConfig().getInt("gui.preview.items-per-page", CONTENT_SLOTS));
         int pages = Math.max(1, (int) Math.ceil(totalRewards / (double) perPage));
         int safePage = Math.min(Math.max(1, page), pages);
@@ -86,11 +77,10 @@ public final class PreviewGUI implements Listener {
                 Placeholder.parsed("pages", String.valueOf(pages))
         );
 
-        Inventory inv = Bukkit.createInventory(new PreviewHolder(crate.id(), page, filter), SIZE, title);
+        Inventory inv = Bukkit.createInventory(new PreviewHolder(crate.id(), page), SIZE, title);
 
-        // Filter and page
+        // Page slice
         List<Reward> rewards = new ArrayList<>(crate.rewards());
-        if (filter != null) rewards.removeIf(r -> r.rarity() != filter);
         int start = Math.max(0, (safePage - 1) * perPage);
         int endExclusive = Math.min(rewards.size(), start + perPage);
 
@@ -103,21 +93,23 @@ public final class PreviewGUI implements Listener {
                     : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
 
             List<String> lore = new ArrayList<>();
+            // The weight is the player's chance to receive this reward.
             double pct = service.weightPercent(crate, r) * 100.0;
-            lore.add(config.msg("preview.rarity-line", Map.of("rarity", r.rarity().name())));
             lore.add(config.msg("preview.chance-line", Map.of("percent", String.format(Locale.US, "%.2f", pct))));
 
-            // Determine a nice display name for preview: prefer reward display,
-            // otherwise fall back to a humanized material name.
-            String label = r.displayName();
-            if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
-                label = ItemUtil.prettyMaterialName(icon.getType());
+            // Honor a display name set directly on the display item; otherwise build one
+            // from the reward display, falling back to a humanized material name.
+            boolean iconHasName = icon.hasItemMeta() && icon.getItemMeta().hasDisplayName();
+            if (!iconHasName) {
+                String label = r.displayName();
+                if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
+                    label = ItemUtil.prettyMaterialName(icon.getType());
+                }
+                ItemUtil.applyName(icon, config.msg("preview.reward-name", Map.of(
+                        "reward_id", r.id(),
+                        "reward_display", label
+                )));
             }
-
-            ItemUtil.applyName(icon, config.msg("preview.reward-name", Map.of(
-                    "reward_id", r.id(),
-                    "reward_display", label
-            )));
             boolean showDetails = plugin.getConfig().getBoolean("gui.preview.show-details", false);
             if (showDetails) {
                 // include items/commands list (trimmed)
@@ -139,20 +131,6 @@ public final class PreviewGUI implements Listener {
             ItemUtil.applyName(empty, config.msg("preview.empty.title"));
             ItemUtil.applyLore(empty, List.of(config.msg("preview.empty.lore")));
             inv.setItem(22, empty);
-        }
-
-        // Filter bar (45..48)
-        int bar = 45;
-        boolean highlight = plugin.getConfig().getBoolean("gui.preview.highlight-selected-filter", true);
-        for (Reward.Rarity rr : Reward.Rarity.values()) {
-            ItemStack it = new ItemStack(RARITY_ICONS.getOrDefault(rr, Material.GRAY_STAINED_GLASS_PANE));
-            ItemUtil.applyName(it, config.msg("preview.filter.name", Map.of("rarity", rr.name())));
-            if (highlight && filter == rr) {
-                try {
-                    it.addUnsafeEnchantment(org.bukkit.enchantments.Enchantment.UNBREAKING, 1);
-                } catch (Throwable ignored) {}
-            }
-            inv.setItem(bar++, it);
         }
 
         // Navigation slots from config
@@ -209,18 +187,12 @@ public final class PreviewGUI implements Listener {
         }
         if (slot == prevSlot) { // prev
             int delta = e.isShiftClick() ? 5 : 1;
-            open(player, crate, Math.max(1, holder.page - delta), holder.filter);
+            open(player, crate, Math.max(1, holder.page - delta));
             return;
         }
         if (slot == nextSlot) { // next
             int delta = e.isShiftClick() ? 5 : 1;
-            open(player, crate, holder.page + delta, holder.filter);
-            return;
-        }
-        if (slot >= 45 && slot < 45 + Reward.Rarity.values().length) {
-            Reward.Rarity rr = Reward.Rarity.values()[slot - 45];
-            Reward.Rarity next = (holder.filter == rr) ? null : rr;
-            open(player, crate, 1, next);
+            open(player, crate, holder.page + delta);
         }
     }
 
@@ -251,20 +223,15 @@ public final class PreviewGUI implements Listener {
             return;
         }
         if (slot == 49) { player.closeInventory(); return; }
-        if (slot == 52) { INSTANCE.open(player, crate, Math.max(1, holder.page - 1), holder.filter); return; }
-        if (slot == 53) { INSTANCE.open(player, crate, holder.page + 1, holder.filter); return; }
-        if (slot >= 45 && slot < 45 + Reward.Rarity.values().length) {
-            Reward.Rarity rr = Reward.Rarity.values()[slot - 45];
-            Reward.Rarity next = (holder.filter == rr) ? null : rr;
-            INSTANCE.open(player, crate, 1, next);
-        }
+        if (slot == 52) { INSTANCE.open(player, crate, Math.max(1, holder.page - 1)); return; }
+        if (slot == 53) { INSTANCE.open(player, crate, holder.page + 1); }
     }
 
     public static void open(Player player, Object ignored, Crate crate) {
         if (INSTANCE != null) INSTANCE.open(player, crate);
     }
 
-    private record PreviewHolder(String crateId, int page, Reward.Rarity filter) implements InventoryHolder {
+    private record PreviewHolder(String crateId, int page) implements InventoryHolder {
         @Override
         public Inventory getInventory() { return null; }
     }

@@ -4,14 +4,11 @@
 preview:
   title: "<gold>Preview</gold> <gray>•</gray> <white><crate_display></white> <gray>(<page>/<pages>)</gray>"
   reward-name: "<yellow><reward_display></yellow>"
-  rarity-line: "<gray>Rarity:</gray> <white><rarity></white>"
   chance-line: "<gray>Chance:</gray> <white><percent>%</white>"
   commands-line: "<gray>Commands:</gray> <white><amount></white>"
   prev: "<gray>Previous</gray>"
   next: "<gray>Next</gray>"
   close: "<red>Close</red>"
-  filter:
-    name: "<white>Filter:</white> <yellow><rarity></yellow>"
   empty:
     title: "<gray>No rewards</gray>"
     lore: "<dark_gray>This crate has no rewards.</dark_gray>"

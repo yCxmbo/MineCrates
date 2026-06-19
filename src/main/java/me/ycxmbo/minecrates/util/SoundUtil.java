@@ -22,10 +22,7 @@ public final class SoundUtil {
     private static final Map<String, String> DEFAULTS = Map.of(
             "open", "BLOCK_CHEST_OPEN:0.7:1.0",
             "reveal-tick", "UI_BUTTON_CLICK:0.5:1.6",
-            "reward-common", "ENTITY_ITEM_PICKUP:1.0:1.0",
-            "reward-rare", "ENTITY_EXPERIENCE_ORB_PICKUP:1.0:1.2",
-            "reward-epic", "ENTITY_PLAYER_LEVELUP:1.0:1.0",
-            "reward-legendary", "UI_TOAST_CHALLENGE_COMPLETE:1.0:1.0");
+            "reward", "UI_TOAST_CHALLENGE_COMPLETE:1.0:1.0");
 
     private SoundUtil() {}
 

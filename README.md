@@ -6,9 +6,9 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
 
 - Crate types: BLOCK or VIRTUAL
 - Per‑crate editor GUI
-  - Rewards: weight, rarity, announce, message, commands, money, XP levels
+  - Rewards: weight (the player's chance to win), announce, message, commands, money, XP levels
   - Command‑only rewards (no items) toggle
-  - Reward display name (MiniMessage) and separate display item (icon)
+  - Reward display name (MiniMessage), applied to the separate display item (icon)
   - Multi‑item rewards (add/replace/remove)
   - Book editor integration for long text (message/commands/hologram lines)
   - Particles: shape, type, radius, Y‑offset, points
@@ -17,9 +17,9 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
   - Hologram: enable, Y‑offset, lines (MiniMessage)
   - Crate meta: display (MiniMessage) and type (BLOCK/VIRTUAL)
   - Live hologram refresh button
-- Preview GUI with rarity filters and configurable navigation slots
+- Preview GUI with pagination and configurable navigation slots
 - Open animation with configurable markers
-- Configurable sounds per event/rarity (`sounds:` in `config.yml`)
+- Configurable sounds per event (`sounds:` in `config.yml`)
 - Pity / milestone system: guarantee a reward after a dry streak (per‑crate `pity:`)
 - Persistent player data (virtual keys, cooldowns, opens, last reward, pity) that survives restarts
 - Permissions for type‑specific open and cooldown bypass
@@ -76,9 +76,9 @@ Global config (`config.yml`) highlights:
 - Messages prefix and reload strings (MiniMessage)
 - Animation defaults and markers
 - Preview GUI:
-  - `gui.preview.highlight-selected-filter` (boolean)
   - `gui.preview.items-per-page` (int)
   - `gui.preview.close-slot`, `prev-slot`, `next-slot` (int slots)
+- Particle shapes reference (`particles.shapes:`): RING, RING_SPIN, SPIRAL, DOUBLE_HELIX, COLUMN, STAR, HEART, VORTEX, SPHERE, WAVE, GALAXY, ATOM
 - Rewards inventory overflow policy: `rewards.inventory-overflow-policy: drop|deny`
 - Holograms refresh interval
 
@@ -102,20 +102,21 @@ crates:
     animation:
       type: ROULETTE
     rewards:
+      # 'weight' is the chance to win: a reward's chance = its weight / sum of all weights.
       legendary_sword:
         weight: 2
-        rarity: LEGENDARY
         announce: true
         display: "<gold>Legendary Sword</gold>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
+          # Optional explicit display name for the icon (overrides 'display' on the icon).
+          name: "<gold>Legendary Sword</gold>"
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
       broadcast_only:
         weight: 10
-        rarity: RARE
         display: "Shoutout"
         display-item:
           material: PAPER
@@ -143,7 +144,8 @@ keys:
 - Reward tiles:
   - Swap‑Offhand: toggle command‑only
   - Cursor+Left: set display item (icon)
-  - Ctrl+Drop: rename reward (MiniMessage)
+  - Middle or Ctrl+Drop: set the display item's name (MiniMessage)
+  - Left/Right: adjust weight (the win chance); the tile shows the resulting chance %
   - Right (no shift): open Reward Details
 - Reward Details:
   - Announce, Message, Commands, Money, XP

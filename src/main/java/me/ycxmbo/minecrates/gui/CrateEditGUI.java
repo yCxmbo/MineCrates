@@ -74,8 +74,7 @@ public final class CrateEditGUI implements InventoryHolder {
 
     static final class EditedReward {
         ItemStack icon;          // display icon (not necessarily a given item)
-        double weight;
-        Reward.Rarity rarity;
+        double weight;           // relative chance of being picked
         boolean announce;
         boolean commandOnly;     // if true, do not give items (commands/money/xp only)
         String display;          // MiniMessage-formatted display title (nullable)
@@ -84,10 +83,9 @@ public final class CrateEditGUI implements InventoryHolder {
         String message = "";
         double money = 0D;
         int xpLevels = 0;
-        EditedReward(ItemStack icon, double weight, Reward.Rarity rarity, boolean announce, boolean commandOnly, String display) {
+        EditedReward(ItemStack icon, double weight, boolean announce, boolean commandOnly, String display) {
             this.icon = icon == null ? new ItemStack(Material.CHEST) : icon.clone();
             this.weight = Math.max(0.0001, weight);
-            this.rarity = rarity == null ? Reward.Rarity.COMMON : rarity;
             this.announce = announce;
             this.commandOnly = commandOnly;
             this.display = (display == null || display.isBlank()) ? null : display;
@@ -257,7 +255,7 @@ public final class CrateEditGUI implements InventoryHolder {
             ItemStack it = r.displayItem() != null ? r.displayItem().clone()
                     : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
             boolean cmdOnly = r.items() == null || r.items().isEmpty();
-            EditedReward er = new EditedReward(it, r.weight(), r.rarity(), r.announce(), cmdOnly, r.displayName());
+            EditedReward er = new EditedReward(it, r.weight(), r.announce(), cmdOnly, r.displayName());
             // Load item list
             for (ItemStack ri : r.items()) if (ri != null && !ri.getType().isAir()) er.items.add(ri.clone());
             // Load commands/message/money/xp
@@ -489,7 +487,7 @@ public final class CrateEditGUI implements InventoryHolder {
         }
         if (slot == 45) { // add reward
             e.setCancelled(true);
-            rewards.add(new EditedReward(new ItemStack(Material.CHEST), 1.0, Reward.Rarity.COMMON, false, false, null));
+            rewards.add(new EditedReward(new ItemStack(Material.CHEST), 1.0, false, false, null));
             redrawRewards();
             return;
         }
@@ -509,9 +507,8 @@ public final class CrateEditGUI implements InventoryHolder {
             if (idx < 0 || idx >= rewards.size()) return;
             EditedReward er = rewards.get(idx);
             if (e.getClick() == ClickType.MIDDLE) {
-                // cycle rarity
-                Reward.Rarity[] rs = Reward.Rarity.values();
-                er.rarity = rs[(er.rarity.ordinal() + 1) % rs.length];
+                // edit the display item's display name (MiniMessage) via chat
+                startRename((Player) e.getWhoClicked(), idx);
             } else if (e.getClick() == ClickType.SWAP_OFFHAND) {
                 // toggle command-only (items disabled)
                 er.commandOnly = !er.commandOnly;
@@ -558,8 +555,8 @@ public final class CrateEditGUI implements InventoryHolder {
             int idx = 1;
             for (EditedReward er : rewards) {
                 String rPath = base + ".rewards.reward" + idx;
+                // The weight is the player's chance of receiving this reward (see RewardPicker).
                 y.set(rPath + ".weight", er.weight);
-                y.set(rPath + ".rarity", er.rarity.name());
                 y.set(rPath + ".announce", er.announce);
                 // Reward message, money, xp
                 y.set(rPath + ".message", (er.message == null || er.message.isBlank()) ? null : er.message);
@@ -568,9 +565,13 @@ public final class CrateEditGUI implements InventoryHolder {
                 // Save separate display item used for GUI/animation
                 y.set(rPath + ".display-item.material", er.icon.getType().name());
                 y.set(rPath + ".display-item.amount", Math.max(1, er.icon.getAmount()));
-                // Save reward display name from editor field (MiniMessage)
-                if (er.display != null && ! er.display.isBlank()) {
+                // Save reward display name from editor field (MiniMessage). It is also
+                // written as the display item's name so the icon carries it directly.
+                if (er.display != null && !er.display.isBlank()) {
                     y.set(rPath + ".display", er.display);
+                    y.set(rPath + ".display-item.name", er.display);
+                } else {
+                    y.set(rPath + ".display-item.name", null);
                 }
                 // Commands
                 if (er.commands == null || er.commands.isEmpty()) y.set(rPath + ".commands", null);
@@ -667,6 +668,9 @@ public final class CrateEditGUI implements InventoryHolder {
 
     private void redrawRewards() {
         for (int i = REWARD_START; i < REWARD_END; i++) inv.setItem(i, null);
+        // Total weight is used to show each reward's chance (weight = chance).
+        double totalWeight = 0D;
+        for (EditedReward er : rewards) totalWeight += Math.max(0.0001, er.weight);
         int slot = REWARD_START;
         for (EditedReward er : rewards) {
             if (slot >= REWARD_END) break;
@@ -674,17 +678,17 @@ public final class CrateEditGUI implements InventoryHolder {
             ItemMeta meta = icon.getItemMeta();
             List<Component> lore = new ArrayList<>();
             String shown = (er.display == null ? "<gray>(default)</gray>" : er.display);
+            double chance = totalWeight > 0 ? (er.weight / totalWeight) * 100.0 : 0D;
             lore.add(MM.deserialize("<gray>Name:</gray> " + shown));
-            lore.add(MM.deserialize("<gray>Rarity:</gray> <white>" + er.rarity.name() + "</white>"));
             lore.add(MM.deserialize("<gray>Weight:</gray> <white>" + String.format(java.util.Locale.US, "%.1f", er.weight) + "</white>"));
+            lore.add(MM.deserialize("<gray>Chance:</gray> <white>" + String.format(java.util.Locale.US, "%.2f", chance) + "%</white>"));
             lore.add(MM.deserialize("<gray>Command-only:</gray> <white>" + (er.commandOnly ? "yes" : "no") + "</white>"));
             lore.add(MM.deserialize("<gray>Swap-Offhand:</gray> <white>toggle command-only</white>"));
             lore.add(MM.deserialize("<gray>Cursor+Left:</gray> <white>set display item</white>"));
-            lore.add(MM.deserialize("<gray>Ctrl+Drop:</gray> <white>edit name (MiniMessage)</white>"));
+            lore.add(MM.deserialize("<gray>Middle / Ctrl+Drop:</gray> <white>edit name (MiniMessage)</white>"));
             lore.add(MM.deserialize("<gray>Right (no shift):</gray> <white>open details</white>"));
             lore.add(MM.deserialize("<gray>Left/Right:</gray> <white>+/– weight</white>"));
             lore.add(MM.deserialize("<gray>Shift:</gray> <white>x10 step</white>"));
-            lore.add(MM.deserialize("<gray>Middle:</gray> <white>cycle rarity</white>"));
             lore.add(MM.deserialize("<gray>Drop:</gray> <white>remove</white>"));
             meta.lore(lore);
             icon.setItemMeta(meta);
