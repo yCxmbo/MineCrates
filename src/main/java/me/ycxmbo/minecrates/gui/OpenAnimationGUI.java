@@ -157,12 +157,15 @@ public final class OpenAnimationGUI {
         ItemStack icon = reward.displayItem() != null
                 ? reward.displayItem()
                 : (reward.items().isEmpty() ? new ItemStack(Material.CHEST) : reward.items().get(0).clone());
-        String label = reward.displayName();
-        if (label == null || label.isEmpty() || label.equalsIgnoreCase(reward.id())) label = ItemUtil.prettyMaterialName(icon.getType());
-        ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");
+        // Honor a display name already set on the display item; otherwise derive one.
+        boolean iconHasName = icon.hasItemMeta() && icon.getItemMeta().hasDisplayName();
+        if (!iconHasName) {
+            String label = reward.displayName();
+            if (label == null || label.isEmpty() || label.equalsIgnoreCase(reward.id())) label = ItemUtil.prettyMaterialName(icon.getType());
+            ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");
+        }
         inv.setItem(13, icon);
-        String rewardSoundKey = "reward-" + reward.rarity().name().toLowerCase(java.util.Locale.ROOT);
-        me.ycxmbo.minecrates.util.SoundUtil.play(player, rewardSoundKey);
+        me.ycxmbo.minecrates.util.SoundUtil.play(player, "reward");
         Bukkit.getScheduler().runTaskLater(MineCrates.get(), () -> {
             player.closeInventory();
             finish.accept(reward);

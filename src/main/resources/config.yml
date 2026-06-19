@@ -31,12 +31,39 @@ animation:
 # GUI preferences (informational)
 gui:
   preview:
-    highlight-selected-filter: true
     show-details: false
     items-per-page: 45
     close-slot: 49
     prev-slot: 52
     next-slot: 53
+
+# Available per-crate particle shapes (set under each crate's 'particles.shape' in crates.yml):
+#   RING          - flat ring around the crate
+#   RING_SPIN     - ring that rotates over time
+#   SPIRAL        - single rising spiral
+#   DOUBLE_HELIX  - two intertwined rising strands
+#   COLUMN        - stacked spinning rings forming a column
+#   STAR          - flat 5-point star
+#   HEART         - upright heart that slowly turns
+#   VORTEX        - tornado-like cone, wider at the top
+#   SPHERE        - points spread over a sphere surface
+#   WAVE          - ring with a travelling vertical ripple
+#   GALAXY        - flat multi-arm spiral galaxy
+#   ATOM          - three tilted orbital rings
+particles:
+  shapes:
+    - RING
+    - RING_SPIN
+    - SPIRAL
+    - DOUBLE_HELIX
+    - COLUMN
+    - STAR
+    - HEART
+    - VORTEX
+    - SPHERE
+    - WAVE
+    - GALAXY
+    - ATOM
 
 # Integrations flags (auto-detected when available)
 integrations:
@@ -65,7 +92,4 @@ data:
 sounds:
   open: "BLOCK_CHEST_OPEN:0.7:1.0"          # played when an opening animation starts
   reveal-tick: "UI_BUTTON_CLICK:0.5:1.6"     # played on each animation step
-  reward-common: "ENTITY_ITEM_PICKUP:1.0:1.0"
-  reward-rare: "ENTITY_EXPERIENCE_ORB_PICKUP:1.0:1.2"
-  reward-epic: "ENTITY_PLAYER_LEVELUP:1.0:1.0"
-  reward-legendary: "UI_TOAST_CHALLENGE_COMPLETE:1.0:1.0"
+  reward: "UI_TOAST_CHALLENGE_COMPLETE:1.0:1.0"  # played when a reward is revealed

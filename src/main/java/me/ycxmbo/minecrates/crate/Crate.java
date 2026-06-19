@@ -16,12 +16,11 @@ public final class Crate {
     public enum AnimationType { ROULETTE, REVEAL, CASCADE }
 
     /**
-     * Pity / milestone configuration. When enabled, a guaranteed reward is granted
-     * after {@code threshold} opens without one. The guaranteed reward is identified
-     * either by {@code rewardId} or, when that is blank, by minimum {@code rarity}.
+     * Pity / milestone configuration. When enabled, a guaranteed reward identified by
+     * {@code rewardId} is granted after {@code threshold} opens without one.
      */
-    public record Pity(boolean enabled, int threshold, String rewardId, Reward.Rarity rarity) {
-        public static final Pity DISABLED = new Pity(false, 0, null, null);
+    public record Pity(boolean enabled, int threshold, String rewardId) {
+        public static final Pity DISABLED = new Pity(false, 0, null);
     }
 
     private final String id;
@@ -47,7 +46,13 @@ public final class Crate {
         SPIRAL,
         DOUBLE_HELIX,
         COLUMN,
-        STAR
+        STAR,
+        HEART,
+        VORTEX,
+        SPHERE,
+        WAVE,
+        GALAXY,
+        ATOM
     }
     private final boolean particlesEnabled;
     private final ParticleShape particleShape;
@@ -266,12 +271,7 @@ public final class Crate {
             boolean enabled = ps2.getBoolean("enabled", false);
             int threshold = ps2.getInt("threshold", 0);
             String rewardId = ps2.getString("reward", null);
-            Reward.Rarity rarity = null;
-            String rarityRaw = ps2.getString("rarity", null);
-            if (rarityRaw != null && !rarityRaw.isBlank()) {
-                try { rarity = Reward.Rarity.valueOf(rarityRaw.toUpperCase(Locale.ROOT)); } catch (Exception ignored) {}
-            }
-            pity = new Pity(enabled, threshold, (rewardId == null || rewardId.isBlank()) ? null : rewardId, rarity);
+            pity = new Pity(enabled, threshold, (rewardId == null || rewardId.isBlank()) ? null : rewardId);
         }
 
         return new Crate(id, display, type, reqKey, cooldownMs, key, keyDisplayOverride, rewards,

@@ -318,7 +318,6 @@ public final class SimpleCrateService implements CrateService {
     private boolean satisfiesPity(Crate crate, Reward reward) {
         Crate.Pity pity = crate.pity();
         if (pity.rewardId() != null) return reward.id().equalsIgnoreCase(pity.rewardId());
-        if (pity.rarity() != null) return reward.rarity().ordinal() >= pity.rarity().ordinal();
         return false;
     }
 
@@ -328,14 +327,6 @@ public final class SimpleCrateService implements CrateService {
             for (Reward r : crate.rewards()) {
                 if (r.id().equalsIgnoreCase(pity.rewardId())) return r;
             }
-            return null;
-        }
-        if (pity.rarity() != null) {
-            List<Reward> eligible = new ArrayList<>();
-            for (Reward r : crate.rewards()) {
-                if (r.rarity().ordinal() >= pity.rarity().ordinal()) eligible.add(r);
-            }
-            if (!eligible.isEmpty()) return eligible.get(ThreadLocalRandom.current().nextInt(eligible.size()));
         }
         return null;
     }
