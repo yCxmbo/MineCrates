@@ -10,6 +10,7 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
   - Command‑only rewards (no items) toggle
   - Reward display name (MiniMessage), applied to the separate display item (icon)
   - Multi‑item rewards (add/replace/remove)
+  - Enchanted reward items: vanilla enchants (`enchants:`) and MineStealEnchants custom enchants (`mse-enchants:`)
   - Book editor integration for long text (message/commands/hologram lines)
   - Particles: shape, type, radius, Y‑offset, points
   - Animation: Roulette/Reveal/Cascade + speeds/cycles/close delay
@@ -124,6 +125,49 @@ crates:
         # No items section -> command-only
         commands:
           - "broadcast &d<player> &7got a &bShoutout&7!"
+```
+
+### Enchanted reward items
+
+Any item under a reward's `items:` map can carry enchantments via two optional blocks:
+
+- `enchants:` – vanilla Bukkit enchants, keyed by modern Minecraft name (`sharpness`,
+  `protection`, `unbreaking`, `fire_aspect`, `thorns`, `mending`, …). Legacy Bukkit names
+  (e.g. `DAMAGE_ALL`) also work. Levels may exceed the vanilla cap.
+- `mse-enchants:` – [MineStealEnchants](https://www.spigotmc.org/) custom enchants, keyed by
+  lowercase id (run `/mse list` for the full set). Each enchant only applies to its intended
+  material/slot; a mismatched or unknown id is skipped with a console warning. Requires the
+  MineStealEnchants plugin — without it, these entries are simply skipped.
+
+```
+    rewards:
+      cursed_blade:
+        weight: 5
+        display: "Cursed Blade"
+        display-item:
+          material: NETHERITE_SWORD
+        items:
+          i1:
+            material: NETHERITE_SWORD
+            name: "<red>Cursed Blade</red>"
+            enchants:            # vanilla
+              sharpness: 5
+              fire_aspect: 2
+            mse-enchants:        # MineStealEnchants custom enchants (id: level)
+              bleed: 2
+              venom: 1
+      enchanted_armor:
+        weight: 10
+        display: "Guardian's Chestplate"
+        display-item:
+          material: DIAMOND_CHESTPLATE
+        items:
+          i1:
+            material: DIAMOND_CHESTPLATE
+            enchants:
+              protection: 4
+              unbreaking: 3
+              thorns: 2
 ```
 
 Keys (`keys.yml`) example:

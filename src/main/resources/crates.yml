@@ -240,6 +240,67 @@ crates:
           amount: 1
         commands:
           - "broadcast &d<player> &7got a &bShoutout&7!"
+      # ── Enchantment examples ────────────────────────────────────────────────
+      # Reward items support two optional enchant blocks under each item:
+      #   enchants:      vanilla Bukkit enchants (modern key names, e.g. sharpness,
+      #                  protection, unbreaking). Levels may exceed the vanilla cap.
+      #   mse-enchants:  MineStealEnchants custom enchants (lowercase ids from /mse list).
+      #                  Each only applies to its intended material/slot; a mismatched or
+      #                  unknown id is skipped with a console warning. Requires the
+      #                  MineStealEnchants plugin – otherwise these entries are skipped.
+      #
+      # Example A — vanilla enchants on armor
+      enchanted_armor:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>Guardian's Chestplate</aqua>"
+        display: "Enchanted Chestplate"
+        display-name: "<aqua>Guardian's Chestplate</aqua>"
+        display-item:
+          material: DIAMOND_CHESTPLATE
+        items:
+          i1:
+            material: DIAMOND_CHESTPLATE
+            name: "<aqua>Guardian's Chestplate</aqua>"
+            enchants:
+              protection: 4
+              unbreaking: 3
+              thorns: 2
+              mending: 1
+      # Example B — vanilla + MineStealEnchants custom enchants on a weapon
+      cursed_blade:
+        weight: 5
+        announce: true
+        message: "<gold>You received a</gold> <red>Cursed Blade</red>"
+        display: "Cursed Blade"
+        display-name: "<red>Cursed Blade</red>"
+        display-item:
+          material: NETHERITE_SWORD
+        items:
+          i1:
+            material: NETHERITE_SWORD
+            name: "<red>Cursed Blade</red>"
+            enchants:
+              sharpness: 5
+              fire_aspect: 2
+            mse-enchants:
+              bleed: 2          # sword enchant (max level 3)
+              venom: 1
+              executioner: 1
+      # Example C — slot-specific MineStealEnchants armor enchant
+      juggernaut_plate:
+        weight: 3
+        display: "Juggernaut Plate"
+        display-item:
+          material: NETHERITE_CHESTPLATE
+        items:
+          i1:
+            material: NETHERITE_CHESTPLATE
+            enchants:
+              protection: 4
+            mse-enchants:
+              juggernaut: 1     # chestplate-only enchant
+              rage: 1
   exp:
     display: "<#00AA00>Exp Crate</#00AA00>"
     type: BLOCK
