@@ -15,7 +15,8 @@ public final class Reward {
 
     private final String id;
     private final String display;
-    private final double weight; // relative chance of being picked (see RewardPicker)
+    private final String customName; // optional reward display name shown on the icon (see GUIs)
+    private final double weight; // chance of being picked; reads as a direct percentage when a crate's weights sum to 100 (see RewardPicker)
     private final ItemStack displayItem; // optional separate display icon
     private final List<ItemStack> items;
     private final List<String> commands;
@@ -24,11 +25,12 @@ public final class Reward {
     private final double money; // optional Vault payout
     private final int expLevels; // optional XP levels
 
-    public Reward(String id, String display, double weight, ItemStack displayItem, List<ItemStack> items,
+    public Reward(String id, String display, String customName, double weight, ItemStack displayItem, List<ItemStack> items,
                   List<String> commands, boolean announce, String message,
                   double money, int expLevels) {
         this.id = id;
         this.display = (display == null || display.isEmpty()) ? id : display;
+        this.customName = (customName == null || customName.isEmpty()) ? null : customName;
         this.weight = Math.max(0.00001, weight);
         this.displayItem = displayItem == null ? null : displayItem.clone();
         this.items = Collections.unmodifiableList(new ArrayList<>(items == null ? List.of() : items));
@@ -41,6 +43,7 @@ public final class Reward {
 
     public String id() { return id; }
     public String displayName() { return display; }
+    public String customName() { return customName; }
     public double weight() { return weight; }
     public ItemStack displayItem() { return displayItem == null ? null : displayItem.clone(); }
     public List<ItemStack> items() { return items; }
@@ -83,9 +86,13 @@ public final class Reward {
     }
 
     public static Reward fromSection(String id, ConfigurationSection sec) {
-        // The weight is the relative chance of this reward being picked (see RewardPicker).
+        // The weight is the chance of this reward being picked. When all weights in a
+        // crate sum to 100, each weight reads directly as its percentage (see RewardPicker).
         double weight = sec.getDouble("weight", 1.0);
         String display = sec.getString("display", id);
+        // Optional dedicated display name shown on the reward icon in the preview GUI
+        // and open animation. Distinct from 'display', which is used for win broadcasts.
+        String customName = sec.getString("display-name", null);
         boolean announce = sec.getBoolean("announce", false);
         String message = sec.getString("message", "");
         double money = sec.getDouble("money", 0D);
@@ -109,7 +116,7 @@ public final class Reward {
         }
         List<String> cmds = sec.getStringList("commands");
 
-        return new Reward(id, display, weight, displayItem, items, cmds, announce, message, money, exp);
+        return new Reward(id, display, customName, weight, displayItem, items, cmds, announce, message, money, exp);
     }
 
     private static final class MessageFormatter {

@@ -43,9 +43,15 @@ crates:
       reward: legendary_sword   # id of the guaranteed reward
     rewards:
       # 'weight' is the player's chance to receive a reward: each reward's chance is
-      # its weight divided by the sum of all weights in this crate.
+      # its weight divided by the sum of all weights in this crate. Tip: make the
+      # weights in a crate sum to 100 and each weight reads directly as a percentage
+      # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
+      #
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       bread1:
-        weight: 35
+        weight: 50
         announce: false
         message: "<gray>You received:</gray> <gold>16x Bread</gold>"
         display-item:
@@ -56,7 +62,7 @@ crates:
             material: BREAD
             amount: 16
       bread2:
-        weight: 35
+        weight: 50
         announce: false
         message: "<gray>You received:</gray> <gold>32x Bread</gold>"
         display-item:
@@ -110,9 +116,15 @@ crates:
       reward: legendary_sword   # id of the guaranteed reward
     rewards:
       # 'weight' is the player's chance to receive a reward: each reward's chance is
-      # its weight divided by the sum of all weights in this crate.
+      # its weight divided by the sum of all weights in this crate. Tip: make the
+      # weights in a crate sum to 100 and each weight reads directly as a percentage
+      # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
+      #
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       diamond_pack:
-        weight: 35
+        weight: 70
         announce: false
         message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
         display-item:
@@ -123,10 +135,11 @@ crates:
             material: DIAMOND
             amount: 16
       legendary_sword:
-        weight: 2
+        weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         display: "Legendary Sword"
+        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
@@ -136,7 +149,7 @@ crates:
           i1:
             material: NETHERITE_SWORD
       broadcast_only:
-        weight: 10
+        weight: 25
         display: "Shoutout"
         display-item:
           material: PAPER
@@ -187,9 +200,15 @@ crates:
       reward: legendary_sword   # id of the guaranteed reward
     rewards:
       # 'weight' is the player's chance to receive a reward: each reward's chance is
-      # its weight divided by the sum of all weights in this crate.
+      # its weight divided by the sum of all weights in this crate. Tip: make the
+      # weights in a crate sum to 100 and each weight reads directly as a percentage
+      # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
+      #
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       diamond_pack:
-        weight: 35
+        weight: 70
         announce: false
         message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
         display-item:
@@ -200,10 +219,11 @@ crates:
             material: DIAMOND
             amount: 16
       legendary_sword:
-        weight: 2
+        weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         display: "Legendary Sword"
+        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
@@ -213,7 +233,7 @@ crates:
           i1:
             material: NETHERITE_SWORD
       broadcast_only:
-        weight: 10
+        weight: 25
         display: "Shoutout"
         display-item:
           material: PAPER
@@ -264,9 +284,15 @@ crates:
       reward: legendary_sword   # id of the guaranteed reward
     rewards:
       # 'weight' is the player's chance to receive a reward: each reward's chance is
-      # its weight divided by the sum of all weights in this crate.
+      # its weight divided by the sum of all weights in this crate. Tip: make the
+      # weights in a crate sum to 100 and each weight reads directly as a percentage
+      # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
+      #
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       diamond_pack:
-        weight: 35
+        weight: 70
         announce: false
         message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
         display-item:
@@ -277,10 +303,11 @@ crates:
             material: DIAMOND
             amount: 16
       legendary_sword:
-        weight: 2
+        weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         display: "Legendary Sword"
+        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
@@ -290,7 +317,7 @@ crates:
           i1:
             material: NETHERITE_SWORD
       broadcast_only:
-        weight: 10
+        weight: 25
         display: "Shoutout"
         display-item:
           material: PAPER
@@ -341,9 +368,15 @@ crates:
       reward: legendary_sword   # id of the guaranteed reward
     rewards:
       # 'weight' is the player's chance to receive a reward: each reward's chance is
-      # its weight divided by the sum of all weights in this crate.
+      # its weight divided by the sum of all weights in this crate. Tip: make the
+      # weights in a crate sum to 100 and each weight reads directly as a percentage
+      # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
+      #
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       diamond_pack:
-        weight: 35
+        weight: 70
         announce: false
         message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
         display-item:
@@ -354,10 +387,11 @@ crates:
             material: DIAMOND
             amount: 16
       legendary_sword:
-        weight: 2
+        weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         display: "Legendary Sword"
+        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
@@ -367,7 +401,7 @@ crates:
           i1:
             material: NETHERITE_SWORD
       broadcast_only:
-        weight: 10
+        weight: 25
         display: "Shoutout"
         display-item:
           material: PAPER

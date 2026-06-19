@@ -40,11 +40,17 @@ public final class OpenAnimationGUI {
             ItemStack icon = r.displayItem() != null
                     ? r.displayItem()
                     : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
-            String label = r.displayName();
-            if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
-                label = ItemUtil.prettyMaterialName(icon.getType());
+            // A dedicated reward 'display-name' takes priority and is applied as-is;
+            // otherwise fall back to the reward display or a humanized material name.
+            if (r.customName() != null && !r.customName().isEmpty()) {
+                ItemUtil.applyName(icon, r.customName());
+            } else {
+                String label = r.displayName();
+                if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
+                    label = ItemUtil.prettyMaterialName(icon.getType());
+                }
+                ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");
             }
-            ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");
             pool.add(icon);
         }
         if (pool.isEmpty()) pool.add(new ItemStack(Material.CHEST));
@@ -157,9 +163,12 @@ public final class OpenAnimationGUI {
         ItemStack icon = reward.displayItem() != null
                 ? reward.displayItem()
                 : (reward.items().isEmpty() ? new ItemStack(Material.CHEST) : reward.items().get(0).clone());
-        // Honor a display name already set on the display item; otherwise derive one.
+        // A dedicated reward 'display-name' takes priority; otherwise honor a display
+        // name already set on the display item; otherwise derive one.
         boolean iconHasName = icon.hasItemMeta() && icon.getItemMeta().hasDisplayName();
-        if (!iconHasName) {
+        if (reward.customName() != null && !reward.customName().isEmpty()) {
+            ItemUtil.applyName(icon, reward.customName());
+        } else if (!iconHasName) {
             String label = reward.displayName();
             if (label == null || label.isEmpty() || label.equalsIgnoreCase(reward.id())) label = ItemUtil.prettyMaterialName(icon.getType());
             ItemUtil.applyName(icon, "<yellow>" + label + "</yellow>");

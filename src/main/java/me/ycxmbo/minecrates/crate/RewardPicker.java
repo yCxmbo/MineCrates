@@ -24,6 +24,9 @@ public final class RewardPicker {
         return rewards.get(rewards.size() - 1);
     }
 
+    // Actual chance of this reward as a fraction of 1. A reward's chance is its weight
+    // divided by the sum of all weights in the crate, so when those weights sum to 100
+    // each weight reads directly as its percentage (e.g. weight 30 -> 30%).
     public double weightPercent(Reward r) {
         return r.weight() / total;
     }

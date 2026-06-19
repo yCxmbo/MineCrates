@@ -97,10 +97,13 @@ public final class PreviewGUI implements Listener {
             double pct = service.weightPercent(crate, r) * 100.0;
             lore.add(config.msg("preview.chance-line", Map.of("percent", String.format(Locale.US, "%.2f", pct))));
 
-            // Honor a display name set directly on the display item; otherwise build one
-            // from the reward display, falling back to a humanized material name.
+            // A dedicated reward 'display-name' takes priority; otherwise honor a display
+            // name set directly on the display item; otherwise build one from the reward
+            // display, falling back to a humanized material name.
             boolean iconHasName = icon.hasItemMeta() && icon.getItemMeta().hasDisplayName();
-            if (!iconHasName) {
+            if (r.customName() != null && !r.customName().isEmpty()) {
+                ItemUtil.applyName(icon, r.customName());
+            } else if (!iconHasName) {
                 String label = r.displayName();
                 if (label == null || label.isEmpty() || label.equalsIgnoreCase(r.id())) {
                     label = ItemUtil.prettyMaterialName(icon.getType());

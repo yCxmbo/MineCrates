@@ -12,7 +12,7 @@ class RewardPickerTest {
 
     private static Reward reward(String id, double weight) {
         // No ItemStack/commands so the Reward can be built without a running server.
-        return new Reward(id, id, weight, null, List.of(), List.of(), false, null, 0D, 0);
+        return new Reward(id, id, null, weight, null, List.of(), List.of(), false, null, 0D, 0);
     }
 
     @Test
