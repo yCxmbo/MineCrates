@@ -78,6 +78,7 @@ public final class CrateEditGUI implements InventoryHolder {
         boolean announce;
         boolean commandOnly;     // if true, do not give items (commands/money/xp only)
         String display;          // MiniMessage-formatted display title (nullable)
+        String customName;       // dedicated reward 'display-name' shown on the icon (nullable); preserved on save
         List<ItemStack> items = new ArrayList<>();
         List<String> commands = new ArrayList<>();
         String message = "";
@@ -256,6 +257,7 @@ public final class CrateEditGUI implements InventoryHolder {
                     : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
             boolean cmdOnly = r.items() == null || r.items().isEmpty();
             EditedReward er = new EditedReward(it, r.weight(), r.announce(), cmdOnly, r.displayName());
+            er.customName = r.customName(); // preserve dedicated display-name through editor save
             // Load item list
             for (ItemStack ri : r.items()) if (ri != null && !ri.getType().isAir()) er.items.add(ri.clone());
             // Load commands/message/money/xp
@@ -573,6 +575,8 @@ public final class CrateEditGUI implements InventoryHolder {
                 } else {
                     y.set(rPath + ".display-item.name", null);
                 }
+                // Preserve the dedicated reward display name (no editor field yet)
+                y.set(rPath + ".display-name", (er.customName == null || er.customName.isBlank()) ? null : er.customName);
                 // Commands
                 if (er.commands == null || er.commands.isEmpty()) y.set(rPath + ".commands", null);
                 else y.set(rPath + ".commands", new java.util.ArrayList<>(er.commands));
