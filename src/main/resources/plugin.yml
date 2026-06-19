@@ -4,7 +4,7 @@ version: 1.1
 api-version: '1.20'
 author: ycxmbo
 website: https://www.discord.gg/geQxxdmX97
-softdepend: [Vault, PlaceholderAPI, DecentHolograms]
+softdepend: [Vault, PlaceholderAPI, DecentHolograms, MineStealEnchants]
 
 commands:
   minecrates:

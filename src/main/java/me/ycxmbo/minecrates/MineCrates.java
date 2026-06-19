@@ -8,6 +8,7 @@ import me.ycxmbo.minecrates.service.impl.SimpleCrateService;
 import me.ycxmbo.minecrates.hook.VaultHook;
 import me.ycxmbo.minecrates.hook.PapiHook;
 import me.ycxmbo.minecrates.hook.HologramManager;
+import me.ycxmbo.minecrates.hook.MineStealEnchantsHook;
 import me.ycxmbo.minecrates.listener.BlockBindingListener;
 import me.ycxmbo.minecrates.visual.RingParticles;
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ public final class MineCrates extends JavaPlugin {
     private VaultHook vault;
     private PapiHook papi;
     private HologramManager holograms;
+    private MineStealEnchantsHook mse;
     private RingParticles particles;
 
     public static MineCrates get() { return INSTANCE; }
@@ -35,6 +37,7 @@ public final class MineCrates extends JavaPlugin {
     public ConfigManager configManager() { return configManager; }
     public VaultHook vault() { return vault; }
     public HologramManager holograms() { return holograms; }
+    public MineStealEnchantsHook mse() { return mse; }
 
     @Override
     public void onEnable() {
@@ -55,6 +58,7 @@ public final class MineCrates extends JavaPlugin {
         vault = new VaultHook(this);
         papi = new PapiHook(this); // registers expansion if PAPI present
         holograms = new HologramManager(this);
+        mse = new MineStealEnchantsHook(this); // custom enchants on rewards if MineStealEnchants present
 
         // Core service
         crateService = new SimpleCrateService(this, vault, holograms);
