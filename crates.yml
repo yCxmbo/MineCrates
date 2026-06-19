@@ -1,0 +1,376 @@
+crates:
+  food:
+    display: "<#ff8000>Food Crate</#ff8000>"
+    type: BLOCK
+    requires-key: true
+    key: food_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 2.3
+      lines:
+        - "<#ff8000><b>Food Crate</b></#ff8000>"
+        - "<#ffbf00>Left Click to Preview</#ffbf00>"
+        - "<#ffbf00>Right Click to Open</#ffbf00>"
+        - "<gray>store.minestrike.org</gray>"
+    particles:
+      enabled: false
+      # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
+      shape: DOUBLE_HELIX
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1           # ring radius around the crate
+      y-offset: 0         # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
+    pity:
+      enabled: false        # guarantee a specific reward after a dry streak
+      threshold: 25         # opens without the pity reward before it is forced
+      reward: legendary_sword   # id of the guaranteed reward
+    rewards:
+      # 'weight' is the player's chance to receive a reward: each reward's chance is
+      # its weight divided by the sum of all weights in this crate.
+      bread1:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <gold>16x Bread</gold>"
+        display-item:
+          material: BREAD
+          amount: 1
+        items:
+          i1:
+            material: BREAD
+            amount: 16
+      bread2:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <gold>32x Bread</gold>"
+        display-item:
+          material: BREAD
+          amount: 1
+        items:
+          i1:
+            material: BREAD
+            amount: 32
+  heart:
+    display: "<#ff0000>Heart Crate</#ff0000>"
+    type: BLOCK
+    requires-key: true
+    key: heart_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 2.3
+      lines:
+        - "<#ff0000><b>Heart Crate</b></#ff0000>"
+        - "<#ff4000>Left Click to Preview</#ff4000>"
+        - "<#ff4000>Right Click to Open</#ff4000>"
+        - "<gray>store.minestrike.org</gray>"
+    particles:
+      enabled: false
+      # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
+      shape: RING
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1.5         # ring radius around the crate
+      y-offset: 0.5       # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
+    pity:
+      enabled: false        # guarantee a specific reward after a dry streak
+      threshold: 25         # opens without the pity reward before it is forced
+      reward: legendary_sword   # id of the guaranteed reward
+    rewards:
+      # 'weight' is the player's chance to receive a reward: each reward's chance is
+      # its weight divided by the sum of all weights in this crate.
+      diamond_pack:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        display-item:
+          material: DIAMOND
+          amount: 1
+        items:
+          i1:
+            material: DIAMOND
+            amount: 16
+      legendary_sword:
+        weight: 2
+        announce: true
+        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        display: "Legendary Sword"
+        display-item:
+          material: NETHERITE_SWORD
+          amount: 1
+        commands:
+          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
+        items:
+          i1:
+            material: NETHERITE_SWORD
+      broadcast_only:
+        weight: 10
+        display: "Shoutout"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "broadcast &d<player> &7got a &bShoutout&7!"
+  pvp:
+    display: "<#00ffff>PvP Crate</#00ffff>"
+    type: BLOCK
+    requires-key: true
+    key: pvp_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 2.3
+      lines:
+        - "<#00ffff><b>PvP Crate</b></#00ffff>"
+        - "<#00bfff>Left Click to Preview</#00bfff>"
+        - "<#00bfff>Right Click to Open</#00bfff>"
+        - "<gray>store.minestrike.org</gray>"
+    particles:
+      enabled: false
+      # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
+      shape: RING
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1.5         # ring radius around the crate
+      y-offset: 0.5       # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
+    pity:
+      enabled: false        # guarantee a specific reward after a dry streak
+      threshold: 25         # opens without the pity reward before it is forced
+      reward: legendary_sword   # id of the guaranteed reward
+    rewards:
+      # 'weight' is the player's chance to receive a reward: each reward's chance is
+      # its weight divided by the sum of all weights in this crate.
+      diamond_pack:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        display-item:
+          material: DIAMOND
+          amount: 1
+        items:
+          i1:
+            material: DIAMOND
+            amount: 16
+      legendary_sword:
+        weight: 2
+        announce: true
+        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        display: "Legendary Sword"
+        display-item:
+          material: NETHERITE_SWORD
+          amount: 1
+        commands:
+          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
+        items:
+          i1:
+            material: NETHERITE_SWORD
+      broadcast_only:
+        weight: 10
+        display: "Shoutout"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "broadcast &d<player> &7got a &bShoutout&7!"
+  exp:
+    display: "<#00AA00>Exp Crate</#00AA00>"
+    type: BLOCK
+    requires-key: true
+    key: exp_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 2.3
+      lines:
+        - "<#00AA00><b>Exp Crate</b></#00AA00>"
+        - "<#00a82a>Left Click to Preview</#00a82a>"
+        - "<#00a82a>Right Click to Open</#00a82a>"
+        - "<gray>store.minestrike.org</gray>"
+    particles:
+      enabled: false
+      # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
+      shape: RING
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1.5         # ring radius around the crate
+      y-offset: 0.5       # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
+    pity:
+      enabled: false        # guarantee a specific reward after a dry streak
+      threshold: 25         # opens without the pity reward before it is forced
+      reward: legendary_sword   # id of the guaranteed reward
+    rewards:
+      # 'weight' is the player's chance to receive a reward: each reward's chance is
+      # its weight divided by the sum of all weights in this crate.
+      diamond_pack:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        display-item:
+          material: DIAMOND
+          amount: 1
+        items:
+          i1:
+            material: DIAMOND
+            amount: 16
+      legendary_sword:
+        weight: 2
+        announce: true
+        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        display: "Legendary Sword"
+        display-item:
+          material: NETHERITE_SWORD
+          amount: 1
+        commands:
+          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
+        items:
+          i1:
+            material: NETHERITE_SWORD
+      broadcast_only:
+        weight: 10
+        display: "Shoutout"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "broadcast &d<player> &7got a &bShoutout&7!"
+  money:
+    display: "<#00ff40>Money Crate</#00ff40>"
+    type: BLOCK
+    requires-key: true
+    key: money_key
+    cooldown-seconds: 30
+    cost:
+      enabled: false      # true to enable
+      currency: VAULT     # VAULT | EXP | EXP_LEVELS
+      amount: 1000        # money or exp/levels
+    hologram:
+      enabled: true
+      y-offset: 2.3
+      lines:
+        - "<#00ff40><b>Money Crate</b></#00ff40>"
+        - "<#00ff80>Left Click to Preview</#00ff80>"
+        - "<#00ff80>Right Click to Open</#00ff80>"
+        - "<gray>store.minestrike.org</gray>"
+    particles:
+      enabled: false
+      # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
+      #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
+      shape: RING
+      type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
+      radius: 1.5         # ring radius around the crate
+      y-offset: 0.5       # height above the block center
+      points: 48          # particles around the ring
+    animation:
+      type: ROULETTE      # ROULETTE | REVEAL | CASCADE
+      roulette:
+        speed-ticks: 2
+        cycles: 40
+      reveal:
+        speed-ticks: 6
+        flickers: 16
+      cascade:
+        speed-ticks: 2
+      close-delay-ticks: 20
+    pity:
+      enabled: false        # guarantee a specific reward after a dry streak
+      threshold: 25         # opens without the pity reward before it is forced
+      reward: legendary_sword   # id of the guaranteed reward
+    rewards:
+      # 'weight' is the player's chance to receive a reward: each reward's chance is
+      # its weight divided by the sum of all weights in this crate.
+      diamond_pack:
+        weight: 35
+        announce: false
+        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        display-item:
+          material: DIAMOND
+          amount: 1
+        items:
+          i1:
+            material: DIAMOND
+            amount: 16
+      legendary_sword:
+        weight: 2
+        announce: true
+        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
+        display: "Legendary Sword"
+        display-item:
+          material: NETHERITE_SWORD
+          amount: 1
+        commands:
+          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
+        items:
+          i1:
+            material: NETHERITE_SWORD
+      broadcast_only:
+        weight: 10
+        display: "Shoutout"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "broadcast &d<player> &7got a &bShoutout&7!"

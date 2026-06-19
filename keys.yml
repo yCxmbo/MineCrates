@@ -1,0 +1,18 @@
+# keys.yml
+keys:
+  heart_key:
+    material: TRIPWIRE_HOOK
+    display: "<#ff0000>Heart Key</#ff0000>" #MiniMessage Color Support
+#    key-display: "" #Legacy Color Support
+  pvp_key:
+    material: TRIPWIRE_HOOK
+    display: "<#00ffff>PvP Key</#00ffff>"
+  food_key:
+    material: TRIPWIRE_HOOK
+    display: "<#ff8000>Food Key</#ff8000>"
+  exp_key:
+    material: TRIPWIRE_HOOK
+    display: "<#00AA00>Exp Key</#00AA00>"
+  money_key:
+    material: TRIPWIRE_HOOK
+    display: "<#00ff40>Money Key</#00ff40>"
