@@ -1,5 +1,6 @@
 crates:
   food:
+  food:
     display: "<#ff8000>Food Crate</#ff8000>"
     type: BLOCK
     requires-key: true
@@ -21,11 +22,11 @@ crates:
       enabled: false
       # Shapes: RING | RING_SPIN | SPIRAL | DOUBLE_HELIX | COLUMN | STAR
       #         | HEART | VORTEX | SPHERE | WAVE | GALAXY | ATOM
-      shape: DOUBLE_HELIX
+      shape: SPHERE
       type: FLAME         # Bukkit Particle name (e.g. FLAME, END_ROD, HEART)
       radius: 1           # ring radius around the crate
-      y-offset: 0         # height above the block center
-      points: 48          # particles around the ring
+      y-offset: 0.4         # height above the block center
+      points: 36          # particles around the ring
     animation:
       type: ROULETTE      # ROULETTE | REVEAL | CASCADE
       roulette:
@@ -51,27 +52,89 @@ crates:
       # preview GUI and open animation. It supports MiniMessage and '&' color codes,
       # and is separate from 'display' (which is used for the win broadcast).
       bread1:
-        weight: 50
+        weight: 25
         announce: false
         message: "<gray>You received:</gray> <gold>16x Bread</gold>"
         display-item:
           material: BREAD
-          amount: 1
+          amount: 16
+        display-name: "<gold>16x Bread"
         items:
           i1:
             material: BREAD
             amount: 16
       bread2:
-        weight: 50
+        weight: 20
         announce: false
         message: "<gray>You received:</gray> <gold>32x Bread</gold>"
         display-item:
           material: BREAD
-          amount: 1
+          amount: 32
+        display-name: "<gold>32x Bread"
         items:
           i1:
             material: BREAD
             amount: 32
+      bread3:
+        weight: 15
+        announce: false
+        message: "<gray>You received:</gray> <gold>64x Bread</gold>"
+        display-item:
+          material: BREAD
+          amount: 64
+        display-name: "<gold>64x Bread"
+        items:
+          i1:
+            material: BREAD
+            amount: 64
+      steak1:
+        weight: 15
+        announce: false
+        message: "<gray>You received:</gray> <gold>16x Steak</gold>"
+        display-item:
+          material: COOKED_BEEF
+          amount: 16
+        display-name: "<gold>16x Steak"
+        items:
+          i1:
+            material: COOKED_BEEF
+            amount: 16
+      steak2:
+        weight: 12
+        announce: false
+        message: "<gray>You received:</gray> <gold>32x Steak</gold>"
+        display-item:
+          material: COOKED_BEEF
+          amount: 32
+        display-name: "<gold>32x Steak"
+        items:
+          i1:
+            material: COOKED_BEEF
+            amount: 32
+      steak3:
+        weight: 10
+        announce: false
+        message: "<gray>You received:</gray> <gold>64x Steak</gold>"
+        display-item:
+          material: COOKED_BEEF
+          amount: 64
+        display-name: "<gold>64x Steak"
+        items:
+          i1:
+            material: COOKED_BEEF
+            amount: 64
+      gaps:
+        weight: 3
+        announce: false
+        message: "<gray>You received:</gray> <gold>5x Golden Apples</gold>"
+        display-item:
+          material: GOLDEN_APPLE
+          amount: 5
+        display-name: "<gold>5x Golden Apples"
+        items:
+          i1:
+            material: GOLDEN_APPLE
+            amount: 5
   heart:
     display: "<#ff0000>Heart Crate</#ff0000>"
     type: BLOCK
@@ -123,39 +186,56 @@ crates:
       # 'display-name' (optional) sets the name shown on the reward's icon in the
       # preview GUI and open animation. It supports MiniMessage and '&' color codes,
       # and is separate from 'display' (which is used for the win broadcast).
-      diamond_pack:
-        weight: 70
+      heart1:
+        weight: 35
         announce: false
-        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
+        message: "<gray>You received:</gray> <red>❤ +1 Heart ❤</red>"
+        display-name: "<red>❤ +1 Heart ❤</red>"
         display-item:
-          material: DIAMOND
-          amount: 1
-        items:
-          i1:
-            material: DIAMOND
-            amount: 16
-      legendary_sword:
-        weight: 5
-        announce: true
-        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display: "Legendary Sword"
-        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
-        display-item:
-          material: NETHERITE_SWORD
+          material: NETHER_STAR
           amount: 1
         commands:
-          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
-        items:
-          i1:
-            material: NETHERITE_SWORD
-      broadcast_only:
+          - "ms addhearts <player> 1"
+      heart2:
         weight: 25
-        display: "Shoutout"
+        announce: false
+        message: "<gray>You received:</gray> <red>❤ +2 Heart ❤</red>"
+        display-name: "<red>❤ +2 Heart ❤</red>"
         display-item:
-          material: PAPER
-          amount: 1
+          material: NETHER_STAR
+          amount: 2
         commands:
-          - "broadcast &d<player> &7got a &bShoutout&7!"
+          - "ms addhearts <player> 2"
+      heart3:
+        weight: 20
+        announce: false
+        message: "<gray>You received:</gray> <red>❤ +3 Heart ❤</red>"
+        display-name: "<red>❤ +3 Heart ❤</red>"
+        display-item:
+          material: NETHER_STAR
+          amount: 3
+        commands:
+          - "ms addhearts <player> 3"
+      heart4:
+        weight: 12
+        announce: false
+        message: "<gray>You received:</gray> <red>❤ +4 Heart ❤</red>"
+        display-name: "<red>❤ +4 Heart ❤</red>"
+        display-item:
+          material: NETHER_STAR
+          amount: 4
+        commands:
+          - "ms addhearts <player> 4"
+      heart5:
+        weight: 8
+        announce: false
+        message: "<gray>You received:</gray> <red>❤ +5 Heart ❤</red>"
+        display-name: "<red>❤ +5 Heart ❤</red>"
+        display-item:
+          material: NETHER_STAR
+          amount: 5
+        commands:
+          - "ms addhearts <player> 5"
   pvp:
     display: "<#00ffff>PvP Crate</#00ffff>"
     type: BLOCK
