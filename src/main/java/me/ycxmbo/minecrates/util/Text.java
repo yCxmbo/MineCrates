@@ -14,10 +14,12 @@ import java.util.List;
  */
 public final class Text {
     private static final MiniMessage MM = MiniMessage.miniMessage();
+    // DecentHolograms understands the ampersand format, including '&#RRGGBB' hex.
+    // It does NOT parse Spigot's '§x§R§R§G§G§B§B' sequence, which would otherwise
+    // render the leading 'x' literally and drop the colour (e.g. "xPvP Crate").
     private static final LegacyComponentSerializer LEGACY = LegacyComponentSerializer.builder()
-            .character('§')
+            .character('&')
             .hexColors()
-            .useUnusualXRepeatedCharacterHexFormat()
             .build();
 
     private Text() {}
