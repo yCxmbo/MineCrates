@@ -18,7 +18,7 @@
         <adventure.minimessage.version>4.17.0</adventure.minimessage.version>
         <vault.version>1.7</vault.version>
         <papi.version>2.11.6</papi.version>
-        <dh.version>2.9.7</dh.version>
+        <dh.version>2.10.0</dh.version>
     </properties>
 
     <!-- Select ONE: -P v1_20_6  or  -P v1_21 (default none) -->
@@ -82,7 +82,7 @@
 
         <!-- DecentHolograms (soft-depend / compileOnly) -->
         <dependency>
-            <groupId>com.github.decentsoftware-eu</groupId>
+            <groupId>com.github.decentsoftware-eu.decentholograms</groupId>
             <artifactId>decentholograms</artifactId>
             <version>${dh.version}</version>
             <scope>provided</scope>
@@ -126,8 +126,8 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
         <repository>
-            <id>decentsoftware</id>
-            <url>https://repo.decentsoftware.eu/artifactory/public/</url>
+            <id>codemc</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
         </repository>
     </repositories>
 
