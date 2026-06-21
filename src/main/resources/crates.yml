@@ -1,6 +1,5 @@
 crates:
   food:
-  food:
     display: "<#ff8000>Food Crate</#ff8000>"
     type: BLOCK
     requires-key: true
@@ -48,10 +47,9 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
-      # in the preview GUI and open animation. It supports MiniMessage and '&' color
-      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
-      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       bread1:
         weight: 25
         announce: false
@@ -59,7 +57,7 @@ crates:
         display-item:
           material: BREAD
           amount: 16
-          display-name: "<gold>16x Bread"
+        display-name: "<gold>16x Bread"
         items:
           i1:
             material: BREAD
@@ -71,7 +69,7 @@ crates:
         display-item:
           material: BREAD
           amount: 32
-          display-name: "<gold>32x Bread"
+        display-name: "<gold>32x Bread"
         items:
           i1:
             material: BREAD
@@ -83,7 +81,7 @@ crates:
         display-item:
           material: BREAD
           amount: 64
-          display-name: "<gold>64x Bread"
+        display-name: "<gold>64x Bread"
         items:
           i1:
             material: BREAD
@@ -95,7 +93,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 16
-          display-name: "<gold>16x Steak"
+        display-name: "<gold>16x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -107,7 +105,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 32
-          display-name: "<gold>32x Steak"
+        display-name: "<gold>32x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -119,7 +117,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 64
-          display-name: "<gold>64x Steak"
+        display-name: "<gold>64x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -131,7 +129,7 @@ crates:
         display-item:
           material: GOLDEN_APPLE
           amount: 5
-          display-name: "<gold>5x Golden Apples"
+        display-name: "<gold>5x Golden Apples"
         items:
           i1:
             material: GOLDEN_APPLE
@@ -184,58 +182,57 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
-      # in the preview GUI and open animation. It supports MiniMessage and '&' color
-      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
-      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
       heart1:
         weight: 35
         announce: false
         message: "<gray>You received:</gray> <red>❤ +1 Heart ❤</red>"
+        display-name: "<red>❤ +1 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 1
-          display-name: "<red>❤ +1 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 1"
       heart2:
         weight: 25
         announce: false
         message: "<gray>You received:</gray> <red>❤ +2 Heart ❤</red>"
+        display-name: "<red>❤ +2 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 2
-          display-name: "<red>❤ +2 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 2"
       heart3:
         weight: 20
         announce: false
         message: "<gray>You received:</gray> <red>❤ +3 Heart ❤</red>"
+        display-name: "<red>❤ +3 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 3
-          display-name: "<red>❤ +3 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 3"
       heart4:
         weight: 12
         announce: false
         message: "<gray>You received:</gray> <red>❤ +4 Heart ❤</red>"
+        display-name: "<red>❤ +4 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 4
-          display-name: "<red>❤ +4 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 4"
       heart5:
         weight: 8
         announce: false
         message: "<gray>You received:</gray> <red>❤ +5 Heart ❤</red>"
+        display-name: "<red>❤ +5 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 5
-          display-name: "<red>❤ +5 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 5"
   pvp:
@@ -286,107 +283,137 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
-      # in the preview GUI and open animation. It supports MiniMessage and '&' color
-      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
-      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
-      diamond_pack:
-        weight: 70
-        announce: false
-        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
-        display-item:
-          material: DIAMOND
-          amount: 1
-        items:
-          i1:
-            material: DIAMOND
-            amount: 16
-      legendary_sword:
-        weight: 5
-        announce: true
-        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display-broadcast-name: "Legendary Sword"
-        display-item:
-          material: NETHERITE_SWORD
-          amount: 1
-          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
-          lore:
-            - "<gray>A blade forged for champions.</gray>"
-            - "<yellow>Wins are broadcast to the server!</yellow>"
-        commands:
-          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
-        items:
-          i1:
-            material: NETHERITE_SWORD
-      broadcast_only:
-        weight: 25
-        display-broadcast-name: "Shoutout"
-        display-item:
-          material: PAPER
-          amount: 1
-        commands:
-          - "broadcast &d<player> &7got a &bShoutout&7!"
-      # ── Enchantment examples ────────────────────────────────────────────────
-      # Reward items support two optional enchant blocks under each item:
-      #   enchants:      vanilla Bukkit enchants (modern key names, e.g. sharpness,
-      #                  protection, unbreaking). Levels may exceed the vanilla cap.
-      #   mse-enchants:  MineStealEnchants custom enchants (lowercase ids from /mse list).
-      #                  Each only applies to its intended material/slot; a mismatched or
-      #                  unknown id is skipped with a console warning. Requires the
-      #                  MineStealEnchants plugin – otherwise these entries are skipped.
-      #
-      # Example A — vanilla enchants on armor
-      enchanted_armor:
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
+      diamond_helmet:
         weight: 10
         announce: true
-        message: "<gray>You received:</gray> <aqua>Guardian's Chestplate</aqua>"
-        display-broadcast-name: "Enchanted Chestplate"
+        message: "<gray>You received:</gray> <aqua>PvP Helmet</aqua>"
+        display: "<aqua>PvP Helmet"
+        display-name: "<aqua>PvP Helmet"
         display-item:
-          material: DIAMOND_CHESTPLATE
-          display-name: "<aqua>Guardian's Chestplate</aqua>"
+          material: DIAMOND_Helmet
+          lore:
+            - "<aqua>Protection 4"
+            - "<aqua>Unbreaking 3"
+            - "<aqua>Respiration 3"
+            - "<aqua>Mending 1"
         items:
           i1:
-            material: DIAMOND_CHESTPLATE
-            name: "<aqua>Guardian's Chestplate</aqua>"
+            material: DIAMOND_HELMET
+            name: "<aqua>PvP Helmet</aqua>"
             enchants:
               protection: 4
               unbreaking: 3
-              thorns: 2
+              respiration: 3
               mending: 1
-      # Example B — vanilla + MineStealEnchants custom enchants on a weapon
-      cursed_blade:
-        weight: 5
+      diamond_chestplate:
+        weight: 10
         announce: true
-        message: "<gold>You received a</gold> <red>Cursed Blade</red>"
-        display-broadcast-name: "Cursed Blade"
+        message: "<gray>You received:</gray> <aqua>PvP Chestplate</aqua>"
+        display: "<aqua>PvP Chestplate"
+        display-name: "<aqua>PvP Chestplate"
         display-item:
-          material: NETHERITE_SWORD
-          display-name: "<red>Cursed Blade</red>"
+          material: DIAMOND_CHESTPLATE
         items:
           i1:
-            material: NETHERITE_SWORD
-            name: "<red>Cursed Blade</red>"
-            enchants:
-              sharpness: 5
-              fire_aspect: 2
-            mse-enchants:
-              bleed: 2          # sword enchant (max level 3)
-              venom: 1
-              executioner: 1
-      # Example C — slot-specific MineStealEnchants armor enchant
-      juggernaut_plate:
-        weight: 3
-        display-broadcast-name: "Juggernaut Plate"
-        display-item:
-          material: NETHERITE_CHESTPLATE
-        items:
-          i1:
-            material: NETHERITE_CHESTPLATE
+            material: DIAMOND_CHESTPLATE
+            name: "<aqua>PvP Chestplate</aqua>"
             enchants:
               protection: 4
+              unbreaking: 3
+              thorns: 3
+              mending: 1
+      diamond_leggings:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>PvP Leggings</aqua>"
+        display: "<aqua>PvP Leggigns"
+        display-name: "<aqua>PvP Leggings"
+        display-item:
+          material: DIAMOND_LEGGINGS
+        items:
+          i1:
+            material: DIAMOND_LEGGINGS
+            name: "<aqua>PvP Leggings</aqua>"
+            enchants:
+              protection: 4
+              blast_protection: 4
+              unbreaking: 3
+              swift_sneak: 3
+              mending: 1
+      diamond_boots:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>PvP Boots</aqua>"
+        display: "<aqua>PvP Boots"
+        display-name: "<aqua>PvP Boots"
+        display-item:
+          material: DIAMOND_BOOTS
+        items:
+          i1:
+            material: DIAMOND_BOOTS
+            name: "<aqua>PvP Boots</aqua>"
+            enchants:
+              protection: 4
+              unbreaking: 3
+              depth_strider: 3
+              feather_falling: 4
+              mending: 1
             mse-enchants:
-              juggernaut: 1     # chestplate-only enchant
-              rage: 1
+              swiftness: 2
+      diamond_sword:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>PvP Sword</aqua>"
+        display: "<aqua>PvP Sword"
+        display-name: "<aqua>PvP Sword"
+        display-item:
+          material: DIAMOND_SWORD
+        items:
+          i1:
+            material: DIAMOND_SWORD
+            name: "<aqua>PvP Sword</aqua>"
+            enchants:
+              sharpness: 5
+              unbreaking: 3
+              looting: 3
+              fire_aspect: 2
+              sweeping_edge: 3
+              mending: 1
+      diamond_pickaxe:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>PvP Pickaxe</aqua>"
+        display: "<aqua>PvP Pickaxe"
+        display-name: "<aqua>PvP Pickaxe"
+        display-item:
+          material: DIAMOND_PICKAXE
+        items:
+          i1:
+            material: DIAMOND_PICKAXE
+            name: "<aqua>PvP Pickaxe</aqua>"
+            enchants:
+              efficiency: 5
+              unbreaking: 3
+              fortune: 3
+              mending: 1
+      shield:
+        weight: 10
+        announce: true
+        message: "<gray>You received:</gray> <aqua>PvP Shield</aqua>"
+        display: "<aqua>PvP Shield"
+        display-name: "<aqua>PvP Shield"
+        display-item:
+          material: SHIELD
+        items:
+          i1:
+            material: SHIELD
+            name: "<aqua>PvP Shield</aqua>"
+            enchants:
+              unbreaking: 3
+              mending: 1
   exp:
     display: "<#00AA00>Exp Crate</#00AA00>"
     type: BLOCK
@@ -435,46 +462,64 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
-      # in the preview GUI and open animation. It supports MiniMessage and '&' color
-      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
-      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
-      diamond_pack:
-        weight: 70
-        announce: false
-        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
-        display-item:
-          material: DIAMOND
-          amount: 1
-        items:
-          i1:
-            material: DIAMOND
-            amount: 16
-      legendary_sword:
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
+      exp1:
         weight: 5
-        announce: true
-        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display-broadcast-name: "Legendary Sword"
+        announce: false
+        message: "<gray>You received </gray> <dark_green>10 Levels"
+        display: "<dark_green>10 Levels"
+        display-name: "<dark_green>10 Levels"
         display-item:
-          material: NETHERITE_SWORD
-          amount: 1
-          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
-          lore:
-            - "<gray>A blade forged for champions.</gray>"
-            - "<yellow>Wins are broadcast to the server!</yellow>"
-        commands:
-          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
-        items:
-          i1:
-            material: NETHERITE_SWORD
-      broadcast_only:
-        weight: 25
-        display-broadcast-name: "Shoutout"
-        display-item:
-          material: PAPER
+          material: experience_bottle
           amount: 1
         commands:
-          - "broadcast &d<player> &7got a &bShoutout&7!"
+          - "xp give <player> 10l"
+      exp2:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <dark_green>30 Levels"
+        display: "<dark_green>30 Levels"
+        display-name: "<dark_green>30 Levels"
+        display-item:
+          material: experience_bottle
+          amount: 1
+        commands:
+          - "xp give <player> 30l"
+      exp3:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <dark_green>50 Levels"
+        display: "<dark_green>50 Levels"
+        display-name: "<dark_green>50 Levels"
+        display-item:
+          material: experience_bottle
+          amount: 1
+        commands:
+          - "xp give <player> 50l"
+      exp4:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <dark_green>70 Levels"
+        display: "<dark_green>70 Levels"
+        display-name: "<dark_green>70 Levels"
+        display-item:
+          material: experience_bottle
+          amount: 1
+        commands:
+          - "xp give <player> 70l"
+      exp5:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <dark_green>100 Levels"
+        display: "<dark_green>100 Levels"
+        display-name: "<dark_green>100 Levels"
+        display-item:
+          material: experience_bottle
+          amount: 1
+        commands:
+          - "xp give <player> 100l"
   money:
     display: "<#00ff40>Money Crate</#00ff40>"
     type: BLOCK
@@ -523,43 +568,61 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
-      # in the preview GUI and open animation. It supports MiniMessage and '&' color
-      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
-      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
-      diamond_pack:
-        weight: 70
-        announce: false
-        message: "<gray>You received:</gray> <aqua>16x Diamonds</aqua>"
-        display-item:
-          material: DIAMOND
-          amount: 1
-        items:
-          i1:
-            material: DIAMOND
-            amount: 16
-      legendary_sword:
+      # 'display-name' (optional) sets the name shown on the reward's icon in the
+      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
+      # and is separate from 'display' (which is used for the win broadcast).
+      money1:
         weight: 5
-        announce: true
-        message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display-broadcast-name: "Legendary Sword"
-        display-item:
-          material: NETHERITE_SWORD
-          amount: 1
-          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
-          lore:
-            - "<gray>A blade forged for champions.</gray>"
-            - "<yellow>Wins are broadcast to the server!</yellow>"
-        commands:
-          - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
-        items:
-          i1:
-            material: NETHERITE_SWORD
-      broadcast_only:
-        weight: 25
-        display-broadcast-name: "Shoutout"
+        announce: false
+        message: "<gray>You received </gray> <green>1,000$</green>"
+        display: "<green>1,000$</green>"
+        display-name: "<green>1,000$</green>"
         display-item:
           material: PAPER
           amount: 1
         commands:
-          - "broadcast &d<player> &7got a &bShoutout&7!"
+          - "eco give <player> 1000"
+      money2:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <green>5,000$</green>"
+        display: "<green>5,000$</green>"
+        display-name: "<green>5,000$</green>"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "eco give <player> 5000"
+      money3:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <green>10,000$</green>"
+        display: "<green>10,000$</green>"
+        display-name: "<green>10,000$</green>"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "eco give <player> 10000"
+      money4:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <green>50,000$</green>"
+        display: "<green>50,000$</green>"
+        display-name: "<green>50,000$</green>"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "eco give <player> 50000"
+      money5:
+        weight: 5
+        announce: false
+        message: "<gray>You received </gray> <green>125,000$</green>"
+        display: "<green>125,000$</green>"
+        display-name: "<green>125,000$</green>"
+        display-item:
+          material: PAPER
+          amount: 1
+        commands:
+          - "eco give <player> 125000"
