@@ -154,6 +154,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "remove" -> {
+                if (!sender.hasPermission("minecrates.remove")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 if (!(sender instanceof Player p)) { Messages.cmd(sender, "<red>Players only.</red>"); return true; }
                 Block b = p.getTargetBlockExact(6);
                 if (b == null) { Messages.cmd(sender, "<red>Look at a block within 6 blocks.</red>"); return true; }
@@ -162,6 +163,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "givekey" -> {
+                if (!sender.hasPermission("minecrates.givekey")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 if (args.length < 4) { Messages.cmd(sender, "<red>Usage:</red> /" + label + " givekey <player> <key> <amount> [virtual]"); return true; }
                 Player t = Bukkit.getPlayerExact(args[1]);
                 if (t == null) { Messages.cmd(sender, "<red>Player not found.</red>"); return true; }
@@ -184,6 +186,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "giveall" -> {
+                if (!sender.hasPermission("minecrates.giveall")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 if (args.length < 3) { Messages.cmd(sender, "<red>Usage:</red> /" + label + " giveall <key> <amount> [virtual]"); return true; }
                 String keyId = args[1].toLowerCase(Locale.ROOT);
                 int amt; try { amt = Math.max(1, Integer.parseInt(args[2])); } catch (Exception e) { Messages.cmd(sender, "<red>Invalid amount.</red>"); return true; }
@@ -202,6 +205,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "set" -> {
+                if (!sender.hasPermission("minecrates.set")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 if (!(sender instanceof Player p)) { Messages.cmd(sender, "<red>Players only.</red>"); return true; }
                 if (args.length < 2) { Messages.cmd(sender, "<red>Usage:</red> /" + label + " set <crate>"); return true; }
                 Crate crate = service.crate(args[1]);
@@ -214,6 +218,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "reload" -> {
+                if (!sender.hasPermission("minecrates.reload")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 // Reload config.yml and messages.yml first so crate defaults see new config values
                 plugin.configManager().reload();
                 service.reloadAllAsync().whenComplete((v, ex) -> {
@@ -233,6 +238,7 @@ public final class MineCratesCommand implements CommandExecutor, TabCompleter {
             }
 
             case "testroll" -> {
+                if (!sender.hasPermission("minecrates.testroll")) { Messages.cmd(sender, "<red>You don't have permission to do this.</red>"); return true; }
                 if (args.length < 3) { Messages.cmd(sender, "<red>Usage:</red> /" + label + " testroll <crate> <n>"); return true; }
                 Crate crate = service.crate(args[1]);
                 if (crate == null) { Messages.cmd(sender, "<red>Unknown crate.</red>"); return true; }
