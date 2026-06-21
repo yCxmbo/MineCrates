@@ -76,6 +76,7 @@ public final class MineCrates extends JavaPlugin {
         new PreviewGUI(this, crateService, configManager);
         getServer().getPluginManager().registerEvents(new me.ycxmbo.minecrates.gui.EditorListener(), this);
         getServer().getPluginManager().registerEvents(new me.ycxmbo.minecrates.gui.BookEditListener(), this);
+        getServer().getPluginManager().registerEvents(new me.ycxmbo.minecrates.gui.AnimationGuiListener(), this);
         particles = new RingParticles(this, crateService);
         particles.start();
 
