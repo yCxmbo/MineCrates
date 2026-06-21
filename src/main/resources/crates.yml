@@ -48,9 +48,10 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-name' (optional) sets the name shown on the reward's icon in the
-      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
-      # and is separate from 'display' (which is used for the win broadcast).
+      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
+      # in the preview GUI and open animation. It supports MiniMessage and '&' color
+      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
+      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
       bread1:
         weight: 25
         announce: false
@@ -58,7 +59,7 @@ crates:
         display-item:
           material: BREAD
           amount: 16
-        display-name: "<gold>16x Bread"
+          display-name: "<gold>16x Bread"
         items:
           i1:
             material: BREAD
@@ -70,7 +71,7 @@ crates:
         display-item:
           material: BREAD
           amount: 32
-        display-name: "<gold>32x Bread"
+          display-name: "<gold>32x Bread"
         items:
           i1:
             material: BREAD
@@ -82,7 +83,7 @@ crates:
         display-item:
           material: BREAD
           amount: 64
-        display-name: "<gold>64x Bread"
+          display-name: "<gold>64x Bread"
         items:
           i1:
             material: BREAD
@@ -94,7 +95,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 16
-        display-name: "<gold>16x Steak"
+          display-name: "<gold>16x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -106,7 +107,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 32
-        display-name: "<gold>32x Steak"
+          display-name: "<gold>32x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -118,7 +119,7 @@ crates:
         display-item:
           material: COOKED_BEEF
           amount: 64
-        display-name: "<gold>64x Steak"
+          display-name: "<gold>64x Steak"
         items:
           i1:
             material: COOKED_BEEF
@@ -130,7 +131,7 @@ crates:
         display-item:
           material: GOLDEN_APPLE
           amount: 5
-        display-name: "<gold>5x Golden Apples"
+          display-name: "<gold>5x Golden Apples"
         items:
           i1:
             material: GOLDEN_APPLE
@@ -183,57 +184,58 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-name' (optional) sets the name shown on the reward's icon in the
-      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
-      # and is separate from 'display' (which is used for the win broadcast).
+      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
+      # in the preview GUI and open animation. It supports MiniMessage and '&' color
+      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
+      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
       heart1:
         weight: 35
         announce: false
         message: "<gray>You received:</gray> <red>❤ +1 Heart ❤</red>"
-        display-name: "<red>❤ +1 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 1
+          display-name: "<red>❤ +1 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 1"
       heart2:
         weight: 25
         announce: false
         message: "<gray>You received:</gray> <red>❤ +2 Heart ❤</red>"
-        display-name: "<red>❤ +2 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 2
+          display-name: "<red>❤ +2 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 2"
       heart3:
         weight: 20
         announce: false
         message: "<gray>You received:</gray> <red>❤ +3 Heart ❤</red>"
-        display-name: "<red>❤ +3 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 3
+          display-name: "<red>❤ +3 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 3"
       heart4:
         weight: 12
         announce: false
         message: "<gray>You received:</gray> <red>❤ +4 Heart ❤</red>"
-        display-name: "<red>❤ +4 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 4
+          display-name: "<red>❤ +4 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 4"
       heart5:
         weight: 8
         announce: false
         message: "<gray>You received:</gray> <red>❤ +5 Heart ❤</red>"
-        display-name: "<red>❤ +5 Heart ❤</red>"
         display-item:
           material: NETHER_STAR
           amount: 5
+          display-name: "<red>❤ +5 Heart ❤</red>"
         commands:
           - "ms addhearts <player> 5"
   pvp:
@@ -284,9 +286,10 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-name' (optional) sets the name shown on the reward's icon in the
-      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
-      # and is separate from 'display' (which is used for the win broadcast).
+      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
+      # in the preview GUI and open animation. It supports MiniMessage and '&' color
+      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
+      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
       diamond_pack:
         weight: 70
         announce: false
@@ -302,11 +305,14 @@ crates:
         weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display: "Legendary Sword"
-        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+        display-broadcast-name: "Legendary Sword"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
+          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+          lore:
+            - "<gray>A blade forged for champions.</gray>"
+            - "<yellow>Wins are broadcast to the server!</yellow>"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
         items:
@@ -314,7 +320,7 @@ crates:
             material: NETHERITE_SWORD
       broadcast_only:
         weight: 25
-        display: "Shoutout"
+        display-broadcast-name: "Shoutout"
         display-item:
           material: PAPER
           amount: 1
@@ -334,10 +340,10 @@ crates:
         weight: 10
         announce: true
         message: "<gray>You received:</gray> <aqua>Guardian's Chestplate</aqua>"
-        display: "Enchanted Chestplate"
-        display-name: "<aqua>Guardian's Chestplate</aqua>"
+        display-broadcast-name: "Enchanted Chestplate"
         display-item:
           material: DIAMOND_CHESTPLATE
+          display-name: "<aqua>Guardian's Chestplate</aqua>"
         items:
           i1:
             material: DIAMOND_CHESTPLATE
@@ -352,10 +358,10 @@ crates:
         weight: 5
         announce: true
         message: "<gold>You received a</gold> <red>Cursed Blade</red>"
-        display: "Cursed Blade"
-        display-name: "<red>Cursed Blade</red>"
+        display-broadcast-name: "Cursed Blade"
         display-item:
           material: NETHERITE_SWORD
+          display-name: "<red>Cursed Blade</red>"
         items:
           i1:
             material: NETHERITE_SWORD
@@ -370,7 +376,7 @@ crates:
       # Example C — slot-specific MineStealEnchants armor enchant
       juggernaut_plate:
         weight: 3
-        display: "Juggernaut Plate"
+        display-broadcast-name: "Juggernaut Plate"
         display-item:
           material: NETHERITE_CHESTPLATE
         items:
@@ -429,9 +435,10 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-name' (optional) sets the name shown on the reward's icon in the
-      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
-      # and is separate from 'display' (which is used for the win broadcast).
+      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
+      # in the preview GUI and open animation. It supports MiniMessage and '&' color
+      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
+      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
       diamond_pack:
         weight: 70
         announce: false
@@ -447,11 +454,14 @@ crates:
         weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display: "Legendary Sword"
-        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+        display-broadcast-name: "Legendary Sword"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
+          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+          lore:
+            - "<gray>A blade forged for champions.</gray>"
+            - "<yellow>Wins are broadcast to the server!</yellow>"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
         items:
@@ -459,7 +469,7 @@ crates:
             material: NETHERITE_SWORD
       broadcast_only:
         weight: 25
-        display: "Shoutout"
+        display-broadcast-name: "Shoutout"
         display-item:
           material: PAPER
           amount: 1
@@ -513,9 +523,10 @@ crates:
       # weights in a crate sum to 100 and each weight reads directly as a percentage
       # (e.g. weight: 30 -> 30% chance). The examples below are tuned to total 100.
       #
-      # 'display-name' (optional) sets the name shown on the reward's icon in the
-      # preview GUI and open animation. It supports MiniMessage and '&' color codes,
-      # and is separate from 'display' (which is used for the win broadcast).
+      # 'display-item.display-name' (optional) sets the name shown on the reward's icon
+      # in the preview GUI and open animation. It supports MiniMessage and '&' color
+      # codes, and is separate from 'display-broadcast-name' (used for the win broadcast).
+      # 'display-item.lore' (optional list) is also shown on the icon in the preview menu.
       diamond_pack:
         weight: 70
         announce: false
@@ -531,11 +542,14 @@ crates:
         weight: 5
         announce: true
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
-        display: "Legendary Sword"
-        display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+        display-broadcast-name: "Legendary Sword"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
+          display-name: "<gradient:#ffd700:#ff8000>Legendary Sword</gradient>"
+          lore:
+            - "<gray>A blade forged for champions.</gray>"
+            - "<yellow>Wins are broadcast to the server!</yellow>"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
         items:
@@ -543,7 +557,7 @@ crates:
             material: NETHERITE_SWORD
       broadcast_only:
         weight: 25
-        display: "Shoutout"
+        display-broadcast-name: "Shoutout"
         display-item:
           material: PAPER
           amount: 1

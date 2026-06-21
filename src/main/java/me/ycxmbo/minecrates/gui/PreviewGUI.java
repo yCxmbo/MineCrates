@@ -92,7 +92,11 @@ public final class PreviewGUI implements Listener {
                     ? r.displayItem()
                     : (r.items().isEmpty() ? new ItemStack(Material.CHEST) : r.items().get(0).clone());
 
+            // Preserve any lore configured on the reward's display-item; the generated
+            // info lines (chance, optional details) are appended below it.
+            boolean iconHasLore = icon.hasItemMeta() && icon.getItemMeta().hasLore();
             List<String> lore = new ArrayList<>();
+            if (iconHasLore) lore.add(""); // blank separator under the display-item's own lore
             // The weight is the player's chance to receive this reward.
             double pct = service.weightPercent(crate, r) * 100.0;
             lore.add(config.msg("preview.chance-line", Map.of("percent", String.format(Locale.US, "%.2f", pct))));
@@ -124,7 +128,7 @@ public final class PreviewGUI implements Listener {
                 }
                 // Intentionally hide reward commands from preview
             }
-            ItemUtil.applyLore(icon, lore);
+            ItemUtil.appendLore(icon, lore);
             inv.setItem(slot++, icon);
         }
 

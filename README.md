@@ -108,18 +108,22 @@ crates:
       legendary_sword:
         weight: 2
         announce: true
-        display: "<gold>Legendary Sword</gold>"
+        # Name used in the win broadcast ("<player> won <name> from a crate!").
+        display-broadcast-name: "<gold>Legendary Sword</gold>"
         display-item:
           material: NETHERITE_SWORD
           amount: 1
-          # Optional explicit display name for the icon (overrides 'display' on the icon).
-          name: "<gold>Legendary Sword</gold>"
+          # Name shown on the reward icon in the preview GUI and open animation.
+          display-name: "<gold>Legendary Sword</gold>"
+          # Optional lore lines shown on the icon in the preview menu.
+          lore:
+            - "<gray>A blade of legend.</gray>"
         message: "<gold>Legendary!</gold> <gray>You received a</gray> <yellow>Legendary Sword</yellow>"
         commands:
           - "broadcast <player> won a &6Legendary Sword&7 from &dMystic!"
       broadcast_only:
         weight: 10
-        display: "Shoutout"
+        display-broadcast-name: "Shoutout"
         display-item:
           material: PAPER
           amount: 1
@@ -144,7 +148,7 @@ Any item under a reward's `items:` map can carry enchantments via two optional b
     rewards:
       cursed_blade:
         weight: 5
-        display: "Cursed Blade"
+        display-broadcast-name: "Cursed Blade"
         display-item:
           material: NETHERITE_SWORD
         items:
@@ -159,7 +163,7 @@ Any item under a reward's `items:` map can carry enchantments via two optional b
               venom: 1
       enchanted_armor:
         weight: 10
-        display: "Guardian's Chestplate"
+        display-broadcast-name: "Guardian's Chestplate"
         display-item:
           material: DIAMOND_CHESTPLATE
         items:

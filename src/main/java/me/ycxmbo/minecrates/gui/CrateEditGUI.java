@@ -570,13 +570,14 @@ public final class CrateEditGUI implements InventoryHolder {
                 // Save reward display name from editor field (MiniMessage). It is also
                 // written as the display item's name so the icon carries it directly.
                 if (er.display != null && !er.display.isBlank()) {
-                    y.set(rPath + ".display", er.display);
+                    y.set(rPath + ".display-broadcast-name", er.display);
                     y.set(rPath + ".display-item.name", er.display);
                 } else {
                     y.set(rPath + ".display-item.name", null);
                 }
-                // Preserve the dedicated reward display name (no editor field yet)
-                y.set(rPath + ".display-name", (er.customName == null || er.customName.isBlank()) ? null : er.customName);
+                // Preserve the dedicated reward display name as a display-item subsection
+                y.set(rPath + ".display-item.display-name",
+                        (er.customName == null || er.customName.isBlank()) ? null : er.customName);
                 // Commands
                 if (er.commands == null || er.commands.isEmpty()) y.set(rPath + ".commands", null);
                 else y.set(rPath + ".commands", new java.util.ArrayList<>(er.commands));

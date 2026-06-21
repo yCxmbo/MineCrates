@@ -89,22 +89,27 @@ public final class Reward {
         // The weight is the chance of this reward being picked. When all weights in a
         // crate sum to 100, each weight reads directly as its percentage (see RewardPicker).
         double weight = sec.getDouble("weight", 1.0);
-        String display = sec.getString("display", id);
-        // Optional dedicated display name shown on the reward icon in the preview GUI
-        // and open animation. Distinct from 'display', which is used for win broadcasts.
-        String customName = sec.getString("display-name", null);
+        // 'display-broadcast-name' is the name used in the win broadcast (announce).
+        // The legacy key 'display' is still honoured as a fallback for older configs.
+        String display = sec.getString("display-broadcast-name", sec.getString("display", id));
         boolean announce = sec.getBoolean("announce", false);
         String message = sec.getString("message", "");
         double money = sec.getDouble("money", 0D);
         int exp = sec.getInt("xp-levels", 0);
 
-        // The display item can carry its own display name via 'display-item.name'
-        // (applied by ItemUtil.itemFromSection). When absent, GUIs fall back to the
-        // reward's 'display' field for the shown name.
+        // The display item is the dedicated icon shown in the preview GUI and open
+        // animation. Its optional 'display-name' subsection sets the name shown on that
+        // icon (distinct from 'display-broadcast-name'). When absent, GUIs fall back to
+        // a name set directly via 'display-item.name', then the broadcast name.
         ItemStack displayItem = null;
+        String customName = null;
         if (sec.isConfigurationSection("display-item")) {
-            displayItem = ItemUtil.itemFromSection(sec.getConfigurationSection("display-item"));
+            ConfigurationSection di = sec.getConfigurationSection("display-item");
+            displayItem = ItemUtil.itemFromSection(di);
+            customName = di.getString("display-name", null);
         }
+        // Backward-compat: honor a top-level 'display-name' when the subsection is absent.
+        if (customName == null) customName = sec.getString("display-name", null);
 
         List<ItemStack> items = new ArrayList<>();
         if (sec.isConfigurationSection("items")) {
