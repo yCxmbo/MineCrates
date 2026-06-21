@@ -8,6 +8,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -23,6 +24,24 @@ import java.util.function.Consumer;
 public final class OpenAnimationGUI {
 
     private OpenAnimationGUI() {}
+
+    /**
+     * Marker holder used to identify an open animation inventory so its clicks
+     * and drags can be cancelled. Without this the rolling/displayed reward
+     * items would be takeable by the player while the crate is spinning.
+     */
+    private record AnimationHolder() implements InventoryHolder {
+        @Override public Inventory getInventory() { return null; }
+    }
+
+    /** @return true if the given inventory is an in-progress crate animation. */
+    public static boolean isAnimation(Inventory inv) {
+        return inv != null && inv.getHolder() instanceof AnimationHolder;
+    }
+
+    private static Inventory createInventory(Player player, Crate crate) {
+        return Bukkit.createInventory(new AnimationHolder(), 27, title(crate));
+    }
 
     public static void play(Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
         me.ycxmbo.minecrates.util.SoundUtil.play(player, "open");
@@ -93,7 +112,7 @@ public final class OpenAnimationGUI {
 
     // ROULETTE strip animation
     private static void playRoulette(Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
-        final Inventory inv = Bukkit.createInventory(player, 27, title(crate));
+        final Inventory inv = createInventory(player, crate);
         player.openInventory(inv);
 
         applyMarkersAndFill(inv);
@@ -115,7 +134,7 @@ public final class OpenAnimationGUI {
 
     // REVEAL center flicker
     private static void playReveal(Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
-        final Inventory inv = Bukkit.createInventory(player, 27, title(crate));
+        final Inventory inv = createInventory(player, crate);
         player.openInventory(inv);
 
         applyMarkersAndFill(inv);
@@ -137,7 +156,7 @@ public final class OpenAnimationGUI {
 
     // CASCADE fill left-to-right then reveal center
     private static void playCascade(Player player, Crate crate, Reward reward, Consumer<Reward> finish) {
-        final Inventory inv = Bukkit.createInventory(player, 27, title(crate));
+        final Inventory inv = createInventory(player, crate);
         player.openInventory(inv);
 
         applyMarkersAndFill(inv);
