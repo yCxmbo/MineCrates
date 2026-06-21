@@ -124,6 +124,29 @@ public final class ItemUtil {
         it.setItemMeta(meta);
     }
 
+    /**
+     * Append lore lines to an item, preserving any lore already present (e.g. lore
+     * configured on a reward's {@code display-item}). Existing lines are kept on top;
+     * the supplied lines are deserialized (MiniMessage, or '&'/§ legacy codes) and
+     * added below them.
+     */
+    public static void appendLore(ItemStack it, List<String> lore) {
+        if (it == null || lore == null || lore.isEmpty()) return;
+        ItemMeta meta = it.getItemMeta();
+        if (meta == null) return;
+        List<net.kyori.adventure.text.Component> lines = meta.hasLore()
+                ? new ArrayList<>(meta.lore())
+                : new ArrayList<>();
+        for (String s : lore) {
+            var comp = (s != null && (s.indexOf('&') >= 0 || s.indexOf('§') >= 0))
+                    ? LEGACY_AMP.deserialize(s)
+                    : MM.deserialize(s == null ? "" : s);
+            lines.add(comp.decoration(TextDecoration.ITALIC, false));
+        }
+        meta.lore(lines);
+        it.setItemMeta(meta);
+    }
+
     public static String prettyMaterialName(Material mat) {
         if (mat == null) return "";
         String base = mat.name().toLowerCase(Locale.ROOT).replace('_', ' ');
