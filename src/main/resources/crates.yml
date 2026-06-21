@@ -288,7 +288,7 @@ crates:
       # and is separate from 'display' (which is used for the win broadcast).
       diamond_helmet:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Helmet</aqua>"
         display: "<aqua>PvP Helmet"
         display-name: "<aqua>PvP Helmet"
@@ -310,7 +310,7 @@ crates:
               mending: 1
       diamond_chestplate:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Chestplate</aqua>"
         display: "<aqua>PvP Chestplate"
         display-name: "<aqua>PvP Chestplate"
@@ -327,7 +327,7 @@ crates:
               mending: 1
       diamond_leggings:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Leggings</aqua>"
         display: "<aqua>PvP Leggigns"
         display-name: "<aqua>PvP Leggings"
@@ -345,7 +345,7 @@ crates:
               mending: 1
       diamond_boots:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Boots</aqua>"
         display: "<aqua>PvP Boots"
         display-name: "<aqua>PvP Boots"
@@ -365,7 +365,7 @@ crates:
               swiftness: 2
       diamond_sword:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Sword</aqua>"
         display: "<aqua>PvP Sword"
         display-name: "<aqua>PvP Sword"
@@ -384,7 +384,7 @@ crates:
               mending: 1
       diamond_pickaxe:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Pickaxe</aqua>"
         display: "<aqua>PvP Pickaxe"
         display-name: "<aqua>PvP Pickaxe"
@@ -401,7 +401,7 @@ crates:
               mending: 1
       shield:
         weight: 10
-        announce: true
+        announce: false
         message: "<gray>You received:</gray> <aqua>PvP Shield</aqua>"
         display: "<aqua>PvP Shield"
         display-name: "<aqua>PvP Shield"
