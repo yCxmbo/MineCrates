@@ -106,6 +106,13 @@ public final class SimpleCrateService implements CrateService {
             registerDefaultTrue(pm, "minecrates.open." + crate.id());
             registerDefaultTrue(pm, "minecrates.preview." + crate.id());
         }
+        // These nodes are registered dynamically, after crates finish loading. Any player who was
+        // already online at that point computed their permission map before the nodes existed, so
+        // they wouldn't see the default-TRUE grant (and hasPermission() would fall through to the
+        // OP default — letting ops open crates but denying everyone else). Recalculate them now.
+        for (Player online : Bukkit.getOnlinePlayers()) {
+            online.recalculatePermissions();
+        }
     }
 
     private void registerDefaultTrue(PluginManager pm, String node) {
