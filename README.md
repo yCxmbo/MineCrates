@@ -48,9 +48,10 @@ A modern, MiniMessage‑powered crates plugin for Paper 1.20+ with an in‑game 
 
 - `minecrates.use` – base permission (help), default: true
 - `minecrates.preview` – allow `/minecrates preview`, default: true
-- `minecrates.open` – allow opening per‑crate via `minecrates.open.<id>` gate
-- `minecrates.open.block` – allow opening BLOCK crates
-- `minecrates.open.virtual` – allow opening VIRTUAL crates
+- `minecrates.open.<id>` – open a specific crate; **registered at load with default: true** so normal players can open crates out of the box (deny per crate to restrict)
+- `minecrates.preview.<id>` – preview a specific crate; **registered at load with default: true** so normal players can preview crates out of the box (deny per crate to restrict)
+- `minecrates.open.block` – allow opening BLOCK crates, default: true
+- `minecrates.open.virtual` – allow opening VIRTUAL crates via command, default: op
 - `minecrates.givekey`, `minecrates.giveall`, `minecrates.set`, `minecrates.remove`, `minecrates.reload`, `minecrates.testroll`, `minecrates.stats` – admin actions
 - `minecrates.bypass.cooldown` – bypass crate cooldowns
 - `minecrates.bypass.cost` – bypass opening costs
