@@ -25,6 +25,8 @@ permissions:
   minecrates.open:
     description: Use /minecrates open <crate> [player]
     default: op
+    children:
+      minecrates.open.*: true
 
   minecrates.open.block:
     description: Open block crates in the world
