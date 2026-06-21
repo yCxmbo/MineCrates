@@ -24,6 +24,9 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionDefault;
+import org.bukkit.plugin.PluginManager;
 
 import java.io.File;
 import java.util.*;
@@ -83,9 +86,36 @@ public final class SimpleCrateService implements CrateService {
             }
 
         }, Executors.newSingleThreadExecutor()).thenRun(() -> {
-            // back to main thread: refresh holograms
-            Bukkit.getScheduler().runTask(plugin, () -> holograms.refreshAll(bindings, this::crate));
+            // back to main thread: refresh holograms & register per-crate permissions
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                registerCratePermissions();
+                holograms.refreshAll(bindings, this::crate);
+            });
         });
+    }
+
+    /**
+     * Register the dynamic per-crate permission nodes ({@code minecrates.open.<id>} and
+     * {@code minecrates.preview.<id>}) with a default of TRUE so normal players can open and
+     * preview crates out of the box. Server owners can still explicitly deny a node per crate
+     * via their permissions plugin. Idempotent: existing registrations are updated, not duplicated.
+     */
+    private void registerCratePermissions() {
+        PluginManager pm = Bukkit.getPluginManager();
+        for (Crate crate : crates.values()) {
+            registerDefaultTrue(pm, "minecrates.open." + crate.id());
+            registerDefaultTrue(pm, "minecrates.preview." + crate.id());
+        }
+    }
+
+    private void registerDefaultTrue(PluginManager pm, String node) {
+        Permission existing = pm.getPermission(node);
+        if (existing == null) {
+            pm.addPermission(new Permission(node, PermissionDefault.TRUE));
+        } else {
+            existing.setDefault(PermissionDefault.TRUE);
+            existing.recalculatePermissibles();
+        }
     }
 
     private void ensureDefaults() {
